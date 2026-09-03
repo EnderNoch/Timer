@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Prosty timer</title>
+<style>
+/* OpenDyslexic z systemu (Font Book) - wszystkie odmiany */
+@font-face{font-family:'AppFont';font-weight:400;font-style:normal;font-display:swap;
+  src:local('OpenDyslexic Regular'),local('OpenDyslexic-Regular'),local('OpenDyslexic')}
+@font-face{font-family:'AppFont';font-weight:700;font-style:normal;font-display:swap;
+  src:local('OpenDyslexic Bold'),local('OpenDyslexic-Bold')}
+@font-face{font-family:'AppFont';font-weight:400;font-style:italic;font-display:swap;
+  src:local('OpenDyslexic Italic'),local('OpenDyslexic-Italic')}
+@font-face{font-family:'AppFont';font-weight:700;font-style:italic;font-display:swap;
+  src:local('OpenDyslexic Bold Italic'),local('OpenDyslexic-BoldItalic')}
+@font-face{font-family:'AppMono';font-weight:400;font-style:normal;font-display:swap;
+  src:local('OpenDyslexicMono'),local('OpenDyslexicMono-Regular'),local('OpenDyslexicMono Regular'),local('SF Mono')}
+html[data-font="dys"],html[data-font="dys"] body,html[data-font="dys"] .tw,
+html[data-font="dys"] input,html[data-font="dys"] button,html[data-font="dys"] select{
+  font-family:'AppFont','OpenDyslexic',-apple-system,BlinkMacSystemFont,sans-serif}
+html[data-font="dys"] #tw-time{font-family:'AppMono','AppFont','OpenDyslexic',ui-monospace,'SF Mono',monospace}
+html[data-font="sys"],html[data-font="sys"] body,html[data-font="sys"] .tw,
+html[data-font="sys"] input,html[data-font="sys"] button,html[data-font="sys"] select{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',sans-serif}
+html[data-font="sys"] #tw-time{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+</style>
+<style>
+:root,html[data-theme="dark"]{
+  --bg:#1A1A19;--fg:#FFFFFF;--muted:#C9C7C0;--line:rgba(255,255,255,0.4);
+  --hover:rgba(122,69,201,0.35);--active:rgba(122,69,201,0.55);
+  --focus:rgba(163,124,255,0.55);--focusline:#B79CFF;--hoverline:#A47BE8;
+  --face:#2B2140;--ring:#9B72F0;--ringpause:#7A45C9;--track:rgba(255,255,255,0.16);
+  --danger:#FF7B7B;--dangersoft:rgba(255,155,155,0.18);
+  --ghost:rgba(255,255,255,0.274);--icon:#C4A9FF;--title:#E6DBFF;--glow:rgba(155,114,240,0.55);
+  color-scheme:dark;
+}
+html[data-theme="light"]{
+  --bg:#F5F2FA;--fg:#1B1526;--muted:#5B5370;--line:rgba(60,40,100,0.35);
+  --hover:rgba(122,69,201,0.14);--active:rgba(122,69,201,0.24);
+  --focus:rgba(107,79,191,0.45);--focusline:#6B4FBF;--hoverline:#8A6BD8;
+  --face:#E8DFF8;--ring:#6B4FBF;--ringpause:#9B87D8;--track:rgba(60,40,100,0.16);
+  --danger:#C0392B;--dangersoft:rgba(192,57,43,0.14);
+  --ghost:rgba(60,40,100,0.32);--icon:#6B4FBF;--title:#3B2A6B;--glow:rgba(107,79,191,0.25);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:light){
+  html[data-theme="auto"]{
+    --bg:#F5F2FA;--fg:#1B1526;--muted:#5B5370;--line:rgba(60,40,100,0.35);
+    --hover:rgba(122,69,201,0.14);--active:rgba(122,69,201,0.24);
+    --focus:rgba(107,79,191,0.45);--focusline:#6B4FBF;--hoverline:#8A6BD8;
+    --face:#E8DFF8;--ring:#6B4FBF;--ringpause:#9B87D8;--track:rgba(60,40,100,0.16);
+    --danger:#C0392B;--dangersoft:rgba(192,57,43,0.14);
+    --ghost:rgba(60,40,100,0.32);--icon:#6B4FBF;--title:#3B2A6B;--glow:rgba(107,79,191,0.25);
+    color-scheme:light;
+  }
+}
+html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center}
+::selection{background:var(--ring);color:var(--bg)}
+.tw{--g:8px;--full:clamp(272px,26vw,400px);--w:calc((var(--full) - var(--g)) / 2);--h:clamp(38px,4.4vh,54px);--fs:clamp(14px,0.95vw,19px);--dial:clamp(240px,min(58vh,40vw),620px);--digits:calc(var(--dial) * 0.145);display:flex;flex-direction:column;align-items:center;gap:clamp(14px,2.2vh,26px);padding:24px 16px;margin:auto;max-height:100vh;overflow:hidden;color:var(--fg);box-sizing:border-box}
+.tw-left,.tw-right{display:flex;flex-direction:column;align-items:center;gap:clamp(12px,1.8vh,22px);min-height:0}
+.tw-dial{position:relative;width:var(--dial);height:var(--dial);flex:0 0 auto}
+.tw-dial svg{width:var(--dial);height:var(--dial);transform:rotate(-90deg)}
+.tw-dial-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--digits) * 0.12)}
+#tw-time{font-size:var(--digits);font-weight:500;font-variant-numeric:tabular-nums;color:var(--fg);line-height:1.1}
+#tw-state{font-size:calc(var(--digits) * 0.32);color:var(--muted)}
+@media (min-width:820px) and (min-height:560px){
+  .tw{flex-direction:row;align-items:center;gap:clamp(36px,7vw,140px)}
+  .tw-right{max-height:calc(100vh - 48px)}
+}
+.tw input,.tw button,.tw select{font-family:inherit}
+.tw button,.tw-field,.tw select{box-sizing:border-box;height:var(--h);width:var(--w);padding:0 12px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--fg);font-size:var(--fs);display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:background 0.12s,border-color 0.12s;overflow:hidden;white-space:nowrap}
+.tw button:hover,.tw-field:hover,.tw select:hover{background:var(--hover);border-color:var(--hoverline)}
+.tw button:focus-visible,.tw-field:focus-within,.tw select:focus-visible{outline:none;border-color:var(--focusline);box-shadow:0 0 0 2px var(--focus)}
+.tw button:active{background:var(--active)}
+.tw-row{display:flex;gap:var(--g);flex-wrap:wrap;justify-content:center;align-items:center;width:var(--full)}
+.tw button.tw-full{width:var(--full)}
+.tw select{width:var(--full);font-size:var(--fs);text-align:center;text-align-last:center}
+.tw select#tw-theme,.tw select#tw-font{width:var(--w)}
+.tw select option{background:var(--bg);color:var(--fg)}
+.tw button.tw-icon{width:var(--h);padding:0;flex:0 0 auto}
+#tw-test{min-width:0}
+.tw button[hidden]{display:none}
+.tw select[hidden]{display:none}
+.tw-row[hidden]{display:none}
+.tw-row.tw-sound{flex-wrap:nowrap}
+.tw-off{opacity:0.45;pointer-events:none}
+#tw-test{flex:1 1 auto;width:auto;min-width:0}
+.tw-third{width:calc((var(--full) - 2 * var(--g)) / 3);padding:0 2px 0 8px;justify-content:space-between}
+.tw button.tw-pre{justify-content:space-between;padding:0 6px 0 12px;gap:4px}
+.tw-pre span:first-child{flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis}
+.tw-pre .x{opacity:0.6;flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;color:var(--fg)}
+.tw-pre .x:hover{opacity:1;color:var(--danger);background:var(--dangersoft)}
+.tw select,#tw-add{}
+#tw-add{border-style:dashed}
+#tw-testicon{display:flex;align-items:center;justify-content:center;width:14px;height:14px;flex:0 0 auto;color:var(--icon)}
+#tw-testicon svg{display:block}
+#tw-presets{width:calc(var(--full) + 16px);overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;align-content:flex-start;min-height:0;flex:0 1 auto;scrollbar-width:thin;scrollbar-color:var(--ring) transparent}
+#tw-presets::-webkit-scrollbar{width:6px}
+#tw-presets::-webkit-scrollbar-thumb{background:var(--ring);border-radius:3px}
+.tw-ghost{box-sizing:border-box;width:var(--w);height:var(--h);border:1px dashed var(--ghost);border-radius:8px;pointer-events:none}
+.tw-lab{font-size:calc(var(--fs) * 0.85);color:var(--muted);text-align:center;margin-top:5px}
+.tw-title{width:var(--full);display:flex;align-items:center;gap:12px;box-sizing:border-box}
+.tw-title::before,.tw-title::after{content:"";flex:1;height:1px;background:var(--line)}
+.tw-title span{font-size:calc(var(--fs) * 1.1);letter-spacing:0.2em;text-transform:uppercase;color:var(--title);text-shadow:0 0 14px var(--glow);white-space:nowrap;padding-left:0.2em}
+.tw-field input{flex:1;min-width:0;width:100%;padding:0;margin:0;border:0;background:transparent;color:var(--fg);font-size:calc(var(--fs) * 1.15);text-align:center;caret-color:var(--focusline);-moz-appearance:textfield;appearance:textfield}
+.tw-field input:focus{outline:none}
+.tw-field input::-webkit-outer-spin-button,.tw-field input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.tw-spin{display:flex;flex-direction:column;gap:2px;flex:0 0 auto}
+.tw-spin button{height:calc(var(--h) * 0.4);width:22px;padding:0;border:0;border-radius:4px;opacity:0.6;gap:0}
+.tw-spin button:hover{opacity:1;background:var(--hover);border:0}
+</style>
+</head>
+<body>
+<div class="tw">
+ <div class="tw-left">
+  <div class="tw-title"><span id="tw-title-text">Prosty timer</span></div>
+
+  <div class="tw-dial">
+    <svg viewBox="0 0 260 260">
+      <circle cx="130" cy="130" r="111" fill="var(--face)"></circle>
+      <circle cx="130" cy="130" r="116" fill="none" stroke="var(--track)" stroke-width="10"></circle>
+      <circle id="tw-arc" cx="130" cy="130" r="116" fill="none" stroke="var(--ring)" stroke-width="10" stroke-linecap="round" stroke-dasharray="728.8" stroke-dashoffset="0"></circle>
+    </svg>
+    <div class="tw-dial-text">
+      <div id="tw-time">05:00</div>
+      <div id="tw-state">gotowy</div>
+    </div>
+  </div>
+ </div>
+
+ <div class="tw-right">
+  <div id="tw-setup" class="tw-row" style="align-items:flex-start;flex-wrap:nowrap;">
+    <div>
+      <div class="tw-field tw-third">
+        <input id="tw-h" type="number" min="0" max="99" value="0" inputmode="numeric">
+        <span class="tw-spin">
+          <button type="button" data-t="tw-h" data-d="1" aria-label="więcej godzin"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 5.5L5 1.5L9 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+          <button type="button" data-t="tw-h" data-d="-1" aria-label="mniej godzin"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 1.5L5 5.5L9 1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+        </span>
+      </div>
+      <div class="tw-lab" id="tw-lab-h">godz</div>
+    </div>
+    <div>
+      <div class="tw-field tw-third">
+        <input id="tw-m" type="number" min="0" max="59" value="5" inputmode="numeric">
+        <span class="tw-spin">
+          <button type="button" data-t="tw-m" data-d="1" aria-label="więcej minut"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 5.5L5 1.5L9 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+          <button type="button" data-t="tw-m" data-d="-1" aria-label="mniej minut"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 1.5L5 5.5L9 1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+        </span>
+      </div>
+      <div class="tw-lab" id="tw-lab-m">min</div>
+    </div>
+    <div>
+      <div class="tw-field tw-third">
+        <input id="tw-s" type="number" min="0" max="59" value="0" inputmode="numeric">
+        <span class="tw-spin">
+          <button type="button" data-t="tw-s" data-d="1" aria-label="więcej sekund"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 5.5L5 1.5L9 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+          <button type="button" data-t="tw-s" data-d="-1" aria-label="mniej sekund"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 1.5L5 5.5L9 1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+        </span>
+      </div>
+      <div class="tw-lab" id="tw-lab-s">sek</div>
+    </div>
+  </div>
+
+  <div class="tw-row tw-sound">
+    <button id="tw-test"><span id="tw-testicon"></span><span id="tw-testlabel">posłuchaj alarmu</span></button>
+    <button id="tw-hint" class="tw-icon" title="Wybierz dźwięki alarmu"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11V3M8 3L5 6M8 3l3 3M2.5 10.5v2a1 1 0 001 1h9a1 1 0 001-1v-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <button id="tw-default" class="tw-icon" hidden><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 105-5 5 5 0 00-3.9 1.9M3 3v2.5h2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+  </div>
+
+  <div class="tw-row" id="tw-list-row" hidden>
+    <select id="tw-list"></select>
+  </div>
+
+  <div class="tw-row">
+    <button id="tw-reset">Wyzeruj</button>
+    <button id="tw-main">Start</button>
+  </div>
+
+  <div class="tw-row">
+    <button id="tw-add" class="tw-full">+ zapisz obecny czas</button>
+    <button id="tw-mute" class="tw-full" hidden></button>
+  </div>
+
+  <div class="tw-row">
+    <select id="tw-lang" aria-label="Język"></select>
+  </div>
+
+  <div class="tw-row">
+    <select id="tw-theme" aria-label="Motyw">
+      <option value="auto">Auto</option>
+      <option value="dark">Dark</option>
+      <option value="light">Light</option>
+    </select>
+    <select id="tw-font" aria-label="Font">
+      <option value="dys">OpenDyslexic</option>
+      <option value="sys">Systemowy</option>
+    </select>
+  </div>
+
+  <div class="tw-row" id="tw-presets"></div>
+ </div>
+</div>
+
+<script>
+(function(){
+  var C=728.8,total=300,endAt=0,leftPaused=300,mode='idle',tick=null,ac=null,beepTimer=null,presets=[];
+  var LANGS={"pl": {"n": "Polski", "t": "Prosty timer", "h": "godz", "m": "min", "s": "sek", "ready": "gotowy", "run": "odliczanie", "pause": "pauza", "over": "po czasie", "start": "Start", "pauseBtn": "Pauza", "resume": "Wznów", "stopBtn": "Zatrzymaj", "reset": "Wyzeruj", "listen": "posłuchaj alarmu", "stopSnd": "zatrzymaj", "save": "+ zapisz obecny czas", "del": "usuń", "muteOn": "wycisz dźwięk", "muteOff": "włącz dźwięk", "askDefault": "Przywrócić domyślny dźwięk alarmu?"}, "en": {"n": "English", "t": "Simple timer", "h": "hrs", "m": "min", "s": "sec", "ready": "ready", "run": "counting down", "pause": "paused", "over": "overtime", "start": "Start", "pauseBtn": "Pause", "resume": "Resume", "stopBtn": "Stop", "reset": "Reset", "listen": "play alarm", "stopSnd": "stop", "save": "+ save current time", "del": "remove", "muteOn": "mute sound", "muteOff": "unmute sound", "askDefault": "Restore the default alarm sound?"}, "de": {"n": "Deutsch", "t": "Einfacher Timer", "h": "Std", "m": "Min", "s": "Sek", "ready": "bereit", "run": "läuft", "pause": "pausiert", "over": "überzogen", "start": "Start", "pauseBtn": "Pause", "resume": "Weiter", "stopBtn": "Stopp", "reset": "Zurücksetzen", "listen": "Alarm anhören", "stopSnd": "stopp", "save": "+ Zeit speichern", "del": "löschen", "muteOn": "Ton stummschalten", "muteOff": "Ton einschalten", "askDefault": "Standard-Alarmton wiederherstellen?"}, "fr": {"n": "Français", "t": "Minuteur simple", "h": "h", "m": "min", "s": "s", "ready": "prêt", "run": "décompte", "pause": "pause", "over": "dépassement", "start": "Démarrer", "pauseBtn": "Pause", "resume": "Reprendre", "stopBtn": "Arrêter", "reset": "Réinitialiser", "listen": "écouter l'alarme", "stopSnd": "arrêter", "save": "+ enregistrer le temps", "del": "supprimer", "muteOn": "couper le son", "muteOff": "rétablir le son", "askDefault": "Rétablir le son d'alarme par défaut ?"}, "es": {"n": "Español", "t": "Temporizador simple", "h": "h", "m": "min", "s": "s", "ready": "listo", "run": "contando", "pause": "pausa", "over": "tiempo extra", "start": "Iniciar", "pauseBtn": "Pausa", "resume": "Reanudar", "stopBtn": "Detener", "reset": "Reiniciar", "listen": "escuchar alarma", "stopSnd": "detener", "save": "+ guardar tiempo", "del": "eliminar", "muteOn": "silenciar sonido", "muteOff": "activar sonido", "askDefault": "¿Restaurar el sonido de alarma predeterminado?"}, "pt": {"n": "Português", "t": "Temporizador simples", "h": "h", "m": "min", "s": "s", "ready": "pronto", "run": "contando", "pause": "pausa", "over": "tempo extra", "start": "Iniciar", "pauseBtn": "Pausar", "resume": "Retomar", "stopBtn": "Parar", "reset": "Zerar", "listen": "ouvir alarme", "stopSnd": "parar", "save": "+ salvar tempo atual", "del": "remover", "muteOn": "silenciar som", "muteOff": "ativar som", "askDefault": "Restaurar o som de alarme padrão?"}, "it": {"n": "Italiano", "t": "Timer semplice", "h": "ore", "m": "min", "s": "sec", "ready": "pronto", "run": "conteggio", "pause": "pausa", "over": "oltre il tempo", "start": "Avvia", "pauseBtn": "Pausa", "resume": "Riprendi", "stopBtn": "Ferma", "reset": "Azzera", "listen": "ascolta allarme", "stopSnd": "ferma", "save": "+ salva tempo", "del": "elimina", "muteOn": "disattiva audio", "muteOff": "attiva audio", "askDefault": "Ripristinare il suono di allarme predefinito?"}, "nl": {"n": "Nederlands", "t": "Eenvoudige timer", "h": "uur", "m": "min", "s": "sec", "ready": "gereed", "run": "aftellen", "pause": "pauze", "over": "over tijd", "start": "Start", "pauseBtn": "Pauze", "resume": "Hervat", "stopBtn": "Stop", "reset": "Wissen", "listen": "alarm beluisteren", "stopSnd": "stop", "save": "+ tijd opslaan", "del": "verwijderen", "muteOn": "geluid dempen", "muteOff": "geluid aan", "askDefault": "Standaard alarmgeluid herstellen?"}, "sv": {"n": "Svenska", "t": "Enkel timer", "h": "tim", "m": "min", "s": "sek", "ready": "redo", "run": "räknar ner", "pause": "pausad", "over": "övertid", "start": "Starta", "pauseBtn": "Paus", "resume": "Fortsätt", "stopBtn": "Stoppa", "reset": "Nollställ", "listen": "lyssna på larm", "stopSnd": "stoppa", "save": "+ spara tid", "del": "ta bort", "muteOn": "ljud av", "muteOff": "ljud på", "askDefault": "Återställa standardljudet för larmet?"}, "da": {"n": "Dansk", "t": "Simpel timer", "h": "timer", "m": "min", "s": "sek", "ready": "klar", "run": "tæller ned", "pause": "pause", "over": "overtid", "start": "Start", "pauseBtn": "Pause", "resume": "Fortsæt", "stopBtn": "Stop", "reset": "Nulstil", "listen": "hør alarm", "stopSnd": "stop", "save": "+ gem tid", "del": "slet", "muteOn": "lyd fra", "muteOff": "lyd til", "askDefault": "Gendan standardalarmlyden?"}, "nb": {"n": "Norsk", "t": "Enkel timer", "h": "timer", "m": "min", "s": "sek", "ready": "klar", "run": "teller ned", "pause": "pause", "over": "overtid", "start": "Start", "pauseBtn": "Pause", "resume": "Fortsett", "stopBtn": "Stopp", "reset": "Nullstill", "listen": "hør alarm", "stopSnd": "stopp", "save": "+ lagre tid", "del": "slett", "muteOn": "lyd av", "muteOff": "lyd på", "askDefault": "Gjenopprette standard alarmlyd?"}, "fi": {"n": "Suomi", "t": "Yksinkertainen ajastin", "h": "t", "m": "min", "s": "s", "ready": "valmis", "run": "laskee", "pause": "tauko", "over": "yliaika", "start": "Käynnistä", "pauseBtn": "Tauko", "resume": "Jatka", "stopBtn": "Pysäytä", "reset": "Nollaa", "listen": "kuuntele hälytys", "stopSnd": "pysäytä", "save": "+ tallenna aika", "del": "poista", "muteOn": "mykistä ääni", "muteOff": "palauta ääni", "askDefault": "Palautetaanko oletushälytysääni?"}, "is": {"n": "Íslenska", "t": "Einfaldur tímamælir", "h": "klst", "m": "mín", "s": "sek", "ready": "tilbúinn", "run": "telur niður", "pause": "í bið", "over": "yfir tíma", "start": "Byrja", "pauseBtn": "Bið", "resume": "Halda áfram", "stopBtn": "Stöðva", "reset": "Núllstilla", "listen": "hlusta á vekjara", "stopSnd": "stöðva", "save": "+ vista tíma", "del": "eyða", "muteOn": "slökkva á hljóði", "muteOff": "kveikja á hljóði", "askDefault": "Endurheimta sjálfgefið vekjarahljóð?"}, "cs": {"n": "Čeština", "t": "Jednoduchý časovač", "h": "hod", "m": "min", "s": "s", "ready": "připraven", "run": "odpočet", "pause": "pauza", "over": "po čase", "start": "Start", "pauseBtn": "Pauza", "resume": "Pokračovat", "stopBtn": "Zastavit", "reset": "Vynulovat", "listen": "poslechnout budík", "stopSnd": "zastavit", "save": "+ uložit čas", "del": "smazat", "muteOn": "ztlumit zvuk", "muteOff": "zapnout zvuk", "askDefault": "Obnovit výchozí zvuk budíku?"}, "sk": {"n": "Slovenčina", "t": "Jednoduchý časovač", "h": "hod", "m": "min", "s": "s", "ready": "pripravený", "run": "odpočet", "pause": "pauza", "over": "po čase", "start": "Štart", "pauseBtn": "Pauza", "resume": "Pokračovať", "stopBtn": "Zastaviť", "reset": "Vynulovať", "listen": "vypočuť budík", "stopSnd": "zastaviť", "save": "+ uložiť čas", "del": "zmazať", "muteOn": "stlmiť zvuk", "muteOff": "zapnúť zvuk", "askDefault": "Obnoviť predvolený zvuk budíka?"}, "sl": {"n": "Slovenščina", "t": "Preprost časovnik", "h": "ur", "m": "min", "s": "s", "ready": "pripravljen", "run": "odštevanje", "pause": "premor", "over": "po času", "start": "Začni", "pauseBtn": "Premor", "resume": "Nadaljuj", "stopBtn": "Ustavi", "reset": "Ponastavi", "listen": "poslušaj alarm", "stopSnd": "ustavi", "save": "+ shrani čas", "del": "izbriši", "muteOn": "utišaj zvok", "muteOff": "vklopi zvok", "askDefault": "Obnovi privzeti zvok alarma?"}, "hr": {"n": "Hrvatski", "t": "Jednostavni timer", "h": "sati", "m": "min", "s": "s", "ready": "spreman", "run": "odbrojavanje", "pause": "pauza", "over": "nakon vremena", "start": "Pokreni", "pauseBtn": "Pauza", "resume": "Nastavi", "stopBtn": "Zaustavi", "reset": "Poništi", "listen": "poslušaj alarm", "stopSnd": "zaustavi", "save": "+ spremi vrijeme", "del": "ukloni", "muteOn": "utišaj zvuk", "muteOff": "uključi zvuk", "askDefault": "Vratiti zadani zvuk alarma?"}, "sr": {"n": "Српски", "t": "Једноставан тајмер", "h": "сати", "m": "мин", "s": "сек", "ready": "спреман", "run": "одбројавање", "pause": "пауза", "over": "после времена", "start": "Покрени", "pauseBtn": "Пауза", "resume": "Настави", "stopBtn": "Заустави", "reset": "Поништи", "listen": "преслушај аларм", "stopSnd": "заустави", "save": "+ сачувај време", "del": "обриши", "muteOn": "утишај звук", "muteOff": "укључи звук", "askDefault": "Вратити подразумевани звук аларма?"}, "bg": {"n": "Български", "t": "Прост таймер", "h": "ч", "m": "мин", "s": "сек", "ready": "готов", "run": "отброяване", "pause": "пауза", "over": "след времето", "start": "Старт", "pauseBtn": "Пауза", "resume": "Продължи", "stopBtn": "Спри", "reset": "Нулирай", "listen": "чуй алармата", "stopSnd": "спри", "save": "+ запази времето", "del": "изтрий", "muteOn": "заглуши звука", "muteOff": "включи звука", "askDefault": "Да се възстанови ли звукът по подразбиране?"}, "ro": {"n": "Română", "t": "Cronometru simplu", "h": "ore", "m": "min", "s": "sec", "ready": "pregătit", "run": "numără", "pause": "pauză", "over": "peste timp", "start": "Pornește", "pauseBtn": "Pauză", "resume": "Reia", "stopBtn": "Oprește", "reset": "Resetează", "listen": "ascultă alarma", "stopSnd": "oprește", "save": "+ salvează timpul", "del": "șterge", "muteOn": "oprește sunetul", "muteOff": "pornește sunetul", "askDefault": "Restabiliți sunetul implicit al alarmei?"}, "hu": {"n": "Magyar", "t": "Egyszerű időzítő", "h": "óra", "m": "perc", "s": "mp", "ready": "kész", "run": "visszaszámlálás", "pause": "szünet", "over": "túlfutás", "start": "Indítás", "pauseBtn": "Szünet", "resume": "Folytatás", "stopBtn": "Leállítás", "reset": "Nullázás", "listen": "riasztás meghallgatása", "stopSnd": "leállítás", "save": "+ idő mentése", "del": "törlés", "muteOn": "hang némítása", "muteOff": "hang bekapcsolása", "askDefault": "Visszaállítja az alapértelmezett riasztási hangot?"}, "el": {"n": "Ελληνικά", "t": "Απλό χρονόμετρο", "h": "ώρες", "m": "λεπ", "s": "δευ", "ready": "έτοιμο", "run": "αντίστροφη μέτρηση", "pause": "παύση", "over": "υπέρβαση", "start": "Έναρξη", "pauseBtn": "Παύση", "resume": "Συνέχεια", "stopBtn": "Διακοπή", "reset": "Μηδενισμός", "listen": "άκου το ξυπνητήρι", "stopSnd": "διακοπή", "save": "+ αποθήκευση χρόνου", "del": "διαγραφή", "muteOn": "σίγαση ήχου", "muteOff": "ενεργοποίηση ήχου", "askDefault": "Επαναφορά προεπιλεγμένου ήχου ειδοποίησης;"}, "tr": {"n": "Türkçe", "t": "Basit zamanlayıcı", "h": "saat", "m": "dk", "s": "sn", "ready": "hazır", "run": "geri sayım", "pause": "duraklatıldı", "over": "süre aşımı", "start": "Başlat", "pauseBtn": "Duraklat", "resume": "Devam et", "stopBtn": "Durdur", "reset": "Sıfırla", "listen": "alarmı dinle", "stopSnd": "durdur", "save": "+ süreyi kaydet", "del": "sil", "muteOn": "sesi kapat", "muteOff": "sesi aç", "askDefault": "Varsayılan alarm sesi geri yüklensin mi?"}, "uk": {"n": "Українська", "t": "Простий таймер", "h": "год", "m": "хв", "s": "сек", "ready": "готово", "run": "відлік", "pause": "пауза", "over": "після часу", "start": "Старт", "pauseBtn": "Пауза", "resume": "Продовжити", "stopBtn": "Зупинити", "reset": "Скинути", "listen": "прослухати сигнал", "stopSnd": "зупинити", "save": "+ зберегти час", "del": "видалити", "muteOn": "вимкнути звук", "muteOff": "увімкнути звук", "askDefault": "Відновити стандартний сигнал?"}, "ru": {"n": "Русский", "t": "Простой таймер", "h": "ч", "m": "мин", "s": "сек", "ready": "готов", "run": "отсчёт", "pause": "пауза", "over": "после времени", "start": "Старт", "pauseBtn": "Пауза", "resume": "Продолжить", "stopBtn": "Остановить", "reset": "Сбросить", "listen": "прослушать сигнал", "stopSnd": "остановить", "save": "+ сохранить время", "del": "удалить", "muteOn": "выключить звук", "muteOff": "включить звук", "askDefault": "Восстановить стандартный сигнал?"}, "be": {"n": "Беларуская", "t": "Просты таймер", "h": "гадз", "m": "хв", "s": "сек", "ready": "гатова", "run": "адлік", "pause": "паўза", "over": "пасля часу", "start": "Старт", "pauseBtn": "Паўза", "resume": "Працягнуць", "stopBtn": "Спыніць", "reset": "Скінуць", "listen": "праслухаць сігнал", "stopSnd": "спыніць", "save": "+ захаваць час", "del": "выдаліць", "muteOn": "выключыць гук", "muteOff": "уключыць гук", "askDefault": "Аднавіць стандартны сігнал?"}, "lt": {"n": "Lietuvių", "t": "Paprastas laikmatis", "h": "val", "m": "min", "s": "s", "ready": "paruošta", "run": "skaičiuoja", "pause": "pauzė", "over": "viršyta", "start": "Pradėti", "pauseBtn": "Pauzė", "resume": "Tęsti", "stopBtn": "Stabdyti", "reset": "Iš naujo", "listen": "klausyti signalo", "stopSnd": "stabdyti", "save": "+ išsaugoti laiką", "del": "ištrinti", "muteOn": "išjungti garsą", "muteOff": "įjungti garsą", "askDefault": "Atkurti numatytąjį signalą?"}, "lv": {"n": "Latviešu", "t": "Vienkāršs taimeris", "h": "st", "m": "min", "s": "sek", "ready": "gatavs", "run": "atskaite", "pause": "pauze", "over": "pēc laika", "start": "Sākt", "pauseBtn": "Pauze", "resume": "Turpināt", "stopBtn": "Apturēt", "reset": "Atiestatīt", "listen": "klausīties signālu", "stopSnd": "apturēt", "save": "+ saglabāt laiku", "del": "dzēst", "muteOn": "izslēgt skaņu", "muteOff": "ieslēgt skaņu", "askDefault": "Atjaunot noklusējuma signālu?"}, "et": {"n": "Eesti", "t": "Lihtne taimer", "h": "t", "m": "min", "s": "sek", "ready": "valmis", "run": "loendab", "pause": "paus", "over": "üleaeg", "start": "Alusta", "pauseBtn": "Paus", "resume": "Jätka", "stopBtn": "Peata", "reset": "Lähtesta", "listen": "kuula äratust", "stopSnd": "peata", "save": "+ salvesta aeg", "del": "kustuta", "muteOn": "vaigista heli", "muteOff": "lülita heli sisse", "askDefault": "Kas taastada vaikimisi äratusheli?"}, "ca": {"n": "Català", "t": "Temporitzador simple", "h": "h", "m": "min", "s": "s", "ready": "a punt", "run": "compte enrere", "pause": "pausa", "over": "temps extra", "start": "Inicia", "pauseBtn": "Pausa", "resume": "Reprèn", "stopBtn": "Atura", "reset": "Reinicia", "listen": "escolta l'alarma", "stopSnd": "atura", "save": "+ desa el temps", "del": "elimina", "muteOn": "silencia el so", "muteOff": "activa el so", "askDefault": "Voleu restaurar el so d'alarma predeterminat?"}, "ar": {"n": "العربية", "t": "مؤقت بسيط", "h": "ساعة", "m": "دقيقة", "s": "ثانية", "ready": "جاهز", "run": "العد التنازلي", "pause": "متوقف مؤقتاً", "over": "بعد الوقت", "start": "ابدأ", "pauseBtn": "إيقاف مؤقت", "resume": "استئناف", "stopBtn": "إيقاف", "reset": "تصفير", "listen": "استمع للمنبه", "stopSnd": "إيقاف", "save": "+ احفظ الوقت الحالي", "del": "حذف", "rtl": 1, "muteOn": "كتم الصوت", "muteOff": "تشغيل الصوت", "askDefault": "استعادة صوت المنبه الافتراضي؟"}, "he": {"n": "עברית", "t": "טיימר פשוט", "h": "שע", "m": "דק", "s": "שנ", "ready": "מוכן", "run": "סופר", "pause": "מושהה", "over": "אחרי הזמן", "start": "התחל", "pauseBtn": "השהה", "resume": "המשך", "stopBtn": "עצור", "reset": "אפס", "listen": "השמע התראה", "stopSnd": "עצור", "save": "+ שמור זמן נוכחי", "del": "מחק", "rtl": 1, "muteOn": "השתק צליל", "muteOff": "הפעל צליל", "askDefault": "לשחזר את צליל ההתראה המוגדר כברירת מחדל?"}, "fa": {"n": "فارسی", "t": "تایمر ساده", "h": "ساعت", "m": "دقیقه", "s": "ثانیه", "ready": "آماده", "run": "شمارش معکوس", "pause": "مکث", "over": "پس از زمان", "start": "شروع", "pauseBtn": "مکث", "resume": "ادامه", "stopBtn": "توقف", "reset": "بازنشانی", "listen": "شنیدن هشدار", "stopSnd": "توقف", "save": "+ ذخیره زمان فعلی", "del": "حذف", "rtl": 1, "muteOn": "بی‌صدا کردن", "muteOff": "پخش صدا", "askDefault": "صدای پیش‌فرض هشدار بازگردانده شود؟"}, "hi": {"n": "हिन्दी", "t": "सरल टाइमर", "h": "घंटे", "m": "मिनट", "s": "सेकंड", "ready": "तैयार", "run": "गिनती", "pause": "रुका", "over": "समय के बाद", "start": "शुरू", "pauseBtn": "रोकें", "resume": "जारी रखें", "stopBtn": "बंद करें", "reset": "रीसेट", "listen": "अलार्म सुनें", "stopSnd": "बंद करें", "save": "+ समय सहेजें", "del": "हटाएं", "muteOn": "ध्वनि बंद करें", "muteOff": "ध्वनि चालू करें", "askDefault": "डिफ़ॉल्ट अलार्म ध्वनि वापस लाएं?"}, "bn": {"n": "বাংলা", "t": "সরল টাইমার", "h": "ঘণ্টা", "m": "মিনিট", "s": "সেকেন্ড", "ready": "প্রস্তুত", "run": "গণনা চলছে", "pause": "বিরতি", "over": "সময়ের পরে", "start": "শুরু", "pauseBtn": "বিরতি", "resume": "চালিয়ে যান", "stopBtn": "থামান", "reset": "রিসেট", "listen": "অ্যালার্ম শুনুন", "stopSnd": "থামান", "save": "+ সময় সংরক্ষণ", "del": "মুছুন", "muteOn": "শব্দ বন্ধ করুন", "muteOff": "শব্দ চালু করুন", "askDefault": "ডিফল্ট অ্যালার্ম শব্দ ফিরিয়ে আনবেন?"}, "th": {"n": "ไทย", "t": "ตัวจับเวลาอย่างง่าย", "h": "ชม", "m": "นาที", "s": "วิ", "ready": "พร้อม", "run": "กำลังนับ", "pause": "หยุดชั่วคราว", "over": "เลยเวลา", "start": "เริ่ม", "pauseBtn": "หยุดชั่วคราว", "resume": "ทำต่อ", "stopBtn": "หยุด", "reset": "รีเซ็ต", "listen": "ฟังเสียงเตือน", "stopSnd": "หยุด", "save": "+ บันทึกเวลาปัจจุบัน", "del": "ลบ", "muteOn": "ปิดเสียง", "muteOff": "เปิดเสียง", "askDefault": "คืนค่าเสียงเตือนเริ่มต้นหรือไม่?"}, "vi": {"n": "Tiếng Việt", "t": "Hẹn giờ đơn giản", "h": "giờ", "m": "phút", "s": "giây", "ready": "sẵn sàng", "run": "đang đếm", "pause": "tạm dừng", "over": "quá giờ", "start": "Bắt đầu", "pauseBtn": "Tạm dừng", "resume": "Tiếp tục", "stopBtn": "Dừng", "reset": "Đặt lại", "listen": "nghe chuông", "stopSnd": "dừng", "save": "+ lưu thời gian", "del": "xóa", "muteOn": "tắt tiếng", "muteOff": "bật tiếng", "askDefault": "Khôi phục âm báo mặc định?"}, "id": {"n": "Bahasa Indonesia", "t": "Pengatur waktu sederhana", "h": "jam", "m": "mnt", "s": "dtk", "ready": "siap", "run": "menghitung", "pause": "jeda", "over": "lewat waktu", "start": "Mulai", "pauseBtn": "Jeda", "resume": "Lanjut", "stopBtn": "Berhenti", "reset": "Atur ulang", "listen": "dengar alarm", "stopSnd": "berhenti", "save": "+ simpan waktu", "del": "hapus", "muteOn": "bisukan suara", "muteOff": "nyalakan suara", "askDefault": "Kembalikan suara alarm bawaan?"}, "ms": {"n": "Bahasa Melayu", "t": "Pemasa mudah", "h": "jam", "m": "min", "s": "saat", "ready": "sedia", "run": "mengira", "pause": "jeda", "over": "lebih masa", "start": "Mula", "pauseBtn": "Jeda", "resume": "Sambung", "stopBtn": "Henti", "reset": "Set semula", "listen": "dengar penggera", "stopSnd": "henti", "save": "+ simpan masa", "del": "buang", "muteOn": "senyapkan bunyi", "muteOff": "hidupkan bunyi", "askDefault": "Kembalikan bunyi penggera lalai?"}, "zh-Hans": {"n": "简体中文", "t": "简易计时器", "h": "时", "m": "分", "s": "秒", "ready": "就绪", "run": "倒计时", "pause": "暂停", "over": "超时", "start": "开始", "pauseBtn": "暂停", "resume": "继续", "stopBtn": "停止", "reset": "重置", "listen": "试听提示音", "stopSnd": "停止", "save": "+ 保存当前时间", "del": "删除", "muteOn": "静音", "muteOff": "打开声音", "askDefault": "恢复默认提示音？"}, "zh-Hant": {"n": "繁體中文", "t": "簡易計時器", "h": "時", "m": "分", "s": "秒", "ready": "就緒", "run": "倒數", "pause": "暫停", "over": "超時", "start": "開始", "pauseBtn": "暫停", "resume": "繼續", "stopBtn": "停止", "reset": "重設", "listen": "試聽提示音", "stopSnd": "停止", "save": "+ 儲存目前時間", "del": "刪除", "muteOn": "靜音", "muteOff": "開啟聲音", "askDefault": "恢復預設提示音？"}, "ja": {"n": "日本語", "t": "シンプルタイマー", "h": "時", "m": "分", "s": "秒", "ready": "準備完了", "run": "カウント中", "pause": "一時停止", "over": "超過", "start": "開始", "pauseBtn": "一時停止", "resume": "再開", "stopBtn": "停止", "reset": "リセット", "listen": "アラームを試聴", "stopSnd": "停止", "save": "+ 現在の時間を保存", "del": "削除", "muteOn": "音を消す", "muteOff": "音を出す", "askDefault": "既定のアラーム音に戻しますか？"}, "ko": {"n": "한국어", "t": "간단한 타이머", "h": "시", "m": "분", "s": "초", "ready": "준비됨", "run": "카운트다운", "pause": "일시정지", "over": "초과", "start": "시작", "pauseBtn": "일시정지", "resume": "계속", "stopBtn": "정지", "reset": "초기화", "listen": "알람 들어보기", "stopSnd": "정지", "save": "+ 현재 시간 저장", "del": "삭제", "muteOn": "소리 끄기", "muteOff": "소리 켜기", "askDefault": "기본 알람 소리로 되돌릴까요?"}};
+  var T=LANGS.pl;
+  var KEY='timer.micro.v1',PHRASE=5900,REPEAT=6120;
+  var langPref='auto';
+  var RUN,PAUSE,OVER,ICON,ICON_DIM,FACE,FG;
+  var themePref='auto',fontPref='dys';
+  function readColors(){
+    var cs=getComputedStyle(document.documentElement);
+    var g=function(n){return cs.getPropertyValue(n).trim()};
+    RUN=g('--ring');PAUSE=g('--ringpause');OVER=g('--danger');
+    ICON=g('--icon');ICON_DIM=g('--track');FACE=g('--face');FG=g('--fg');
+  }
+  var nodes=[],testing=false,testTimer=null,muted=false;
+  var AKEY='timer.micro.alarm',LKEY='timer.micro.list',customBuf=null,customName='',customB64='';
+  var $=function(i){return document.getElementById(i)};
+  var arc=$('tw-arc'),tEl=$('tw-time'),sEl=$('tw-state'),main=$('tw-main'),setup=$('tw-setup'),test=$('tw-test'),pbox=$('tw-presets');
+  var tIcon=$('tw-testicon'),tLabel=$('tw-testlabel');
+
+  var PLAY='<svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><polygon points="3,2 12,7 3,12" fill="currentColor"></polygon></svg>';
+  var STOP='<svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5" fill="currentColor"></rect></svg>';
+  var MUTE='<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M7.5 3.2L4.8 5.4H2.6v5.2h2.2l2.7 2.2V3.2z" fill="currentColor"></path><path d="M10.4 6.2l3.2 3.6M13.6 6.2l-3.2 3.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"></path></svg>';
+  tIcon.innerHTML=PLAY;
+
+  var links=[],cv=document.createElement('canvas'),lastIcon='';
+  cv.width=64;cv.height=64;
+  ['icon','shortcut icon'].forEach(function(rel){
+    var l=document.createElement('link');l.rel=rel;l.type='image/png';l.sizes='64x64';
+    document.head.appendChild(l);links.push(l);
+  });
+  function icon(state,frac){
+    var key=state+'|'+Math.round(frac*100);
+    if(key===lastIcon)return; lastIcon=key;
+    try{
+      var x=cv.getContext('2d');
+      x.clearRect(0,0,64,64);
+      x.fillStyle=FACE;
+      x.beginPath();x.arc(32,32,28,0,Math.PI*2);x.fill();
+      x.lineCap='round';x.lineWidth=9;
+      x.strokeStyle=ICON_DIM;
+      x.beginPath();x.arc(32,32,25,0,Math.PI*2);x.stroke();
+      if(state==='idle'){
+        x.strokeStyle=ICON;
+        x.beginPath();x.arc(32,32,25,0,Math.PI*2);x.stroke();
+        x.lineWidth=8;x.strokeStyle=ICON;
+        x.beginPath();x.moveTo(32,32);x.lineTo(32,17);x.stroke();
+        x.beginPath();x.moveTo(32,32);x.lineTo(44,39);x.stroke();
+      }else if(state==='over'){
+        x.strokeStyle=OVER;
+        x.beginPath();x.arc(32,32,25,0,Math.PI*2);x.stroke();
+      }else{
+        x.strokeStyle=(state==='paused'?PAUSE:ICON);
+        if(frac>0.002){x.beginPath();x.arc(32,32,25,-Math.PI/2,-Math.PI/2+Math.PI*2*frac);x.stroke()}
+      }
+      var url=cv.toDataURL('image/png');
+      links.forEach(function(l){l.href=url});
+    }catch(e){}
+  }
+
+  function label(sec){
+    var h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=sec%60;
+    var p=function(n){return n<10?'0'+n:''+n};
+    return h>0?(h+':'+p(m)+':'+p(s)):(m+':'+p(s));
+  }
+  function drawPresets(){
+    pbox.innerHTML='';
+    presets.forEach(function(sec){
+      var b=document.createElement('button');
+      b.className='tw-pre';b.dataset.sec=sec;
+      var t=document.createElement('span');t.textContent=label(sec);
+      var x=document.createElement('span');x.className='x';x.title='usu\u0144';
+      x.innerHTML='<svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 3.5L10.5 10.5M10.5 3.5L3.5 10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>';
+      b.appendChild(t);b.appendChild(x);
+      pbox.appendChild(b);
+    });
+    if(presets.length%2===1){
+      var ghost=document.createElement('div');
+      ghost.className='tw-ghost';
+      pbox.appendChild(ghost);
+    }
+    if(typeof fitDial==='function')setTimeout(fitDial,0);
+  }
+
+  function applyFont(){
+    document.documentElement.setAttribute('data-font',fontPref);
+    $('tw-font').value=fontPref;
+    if(typeof fitDial==='function')setTimeout(fitDial,0);
+  }
+  function applyTheme(){
+    document.documentElement.setAttribute('data-theme',themePref);
+    $('tw-theme').value=themePref;
+    readColors();lastIcon='';
+  }
+  function paintMute(){
+    var mb=$('tw-mute');
+    var live=(mode==='over'&&beepTimer);
+    $('tw-test').disabled=live;
+    $('tw-test').style.opacity=live?'0.4':'';
+    $('tw-test').style.pointerEvents=live?'none':'';
+    if(mode!=='idle'){
+      $('tw-add').hidden=true;mb.hidden=false;
+      mb.innerHTML='';
+      var ic=document.createElement('span');
+      ic.style.cssText='display:flex;align-items:center;justify-content:center;width:15px;height:15px;flex:0 0 auto';
+      ic.innerHTML=muted?PLAY:MUTE;
+      var tx=document.createElement('span');
+      tx.textContent=muted?T.muteOff:T.muteOn;
+      mb.appendChild(ic);mb.appendChild(tx);
+    }else{
+      $('tw-add').hidden=false;mb.hidden=true;
+    }
+  }
+  var folderFiles=[];
+  function buildList(){
+    var sel=$('tw-list');
+    sel.innerHTML='';
+    if(!folderFiles.length){$('tw-list-row').hidden=true;return}
+    folderFiles.forEach(function(f,i){
+      var o=document.createElement('option');
+      o.value=String(i);o.textContent=f.name.replace(/\.[^.]+$/,'');
+      sel.appendChild(o);
+    });
+    $('tw-list-row').hidden=false;
+    sel.selectedIndex=-1;
+  }
+  function useFile(f,persist){
+    var r=new FileReader();
+    r.onload=function(){
+      var buf=r.result;
+      if(persist&&f.size<3000000){
+        var fr=new FileReader();
+        fr.onload=function(){loadArrayBuffer(buf,f.name,fr.result,true)};
+        fr.readAsDataURL(f);
+      }else{
+        loadArrayBuffer(buf,f.name,null,false);
+      }
+    };
+    r.readAsArrayBuffer(f);
+  }
+  function markCustom(){
+    $('tw-default').hidden=!customBuf;
+  }
+  function loadArrayBuffer(buf,name,b64,persist){
+    var a=ctx();
+    a.decodeAudioData(buf.slice(0),function(decoded){
+      customBuf=decoded;customName=name||'';
+      if(persist&&b64){
+        try{localStorage.setItem(AKEY,JSON.stringify({n:customName,d:b64}))}catch(e){}
+      }
+      markCustom();
+    },function(){markCustom()});
+  }
+  function loadStored(){
+    try{
+      var raw=localStorage.getItem(AKEY);if(!raw)return;
+      var d=JSON.parse(raw);if(!d||!d.d)return;
+      customB64=d.d;customName=d.n||'';
+      var bin=atob(d.d.split(',').pop()),len=bin.length,arr=new Uint8Array(len);
+      for(var i=0;i<len;i++)arr[i]=bin.charCodeAt(i);
+      loadArrayBuffer(arr.buffer,customName,null,false);
+    }catch(e){}
+  }
+  function detectLang(){
+    var list=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||'en'];
+    for(var i=0;i<list.length;i++){
+      var code=list[i]; if(!code)continue;
+      if(LANGS[code])return code;
+      var low=code.toLowerCase();
+      if(low.indexOf('zh')===0){
+        if(low.indexOf('hant')>-1||low.indexOf('tw')>-1||low.indexOf('hk')>-1||low.indexOf('mo')>-1)return 'zh-Hant';
+        return 'zh-Hans';
+      }
+      if(low.indexOf('no')===0||low.indexOf('nn')===0)return 'nb';
+      var base=low.split('-')[0];
+      if(LANGS[base])return base;
+    }
+    return 'en';
+  }
+  function activeLang(){return langPref==='auto'?detectLang():(LANGS[langPref]?langPref:'en')}
+  function buildLangList(){
+    var sel=$('tw-lang');
+    var codes=Object.keys(LANGS).sort(function(a,b){return LANGS[a].n.localeCompare(LANGS[b].n)});
+    sel.innerHTML='';
+    var auto=document.createElement('option');
+    auto.value='auto';auto.textContent='Auto \u2014 '+LANGS[detectLang()].n;
+    sel.appendChild(auto);
+    codes.forEach(function(c){
+      var o=document.createElement('option');
+      o.value=c;o.textContent=LANGS[c].n;
+      sel.appendChild(o);
+    });
+    sel.value=langPref;
+  }
+  function applyLang(){
+    T=LANGS[activeLang()];
+    document.documentElement.lang=activeLang();
+    document.documentElement.dir=T.rtl?'rtl':'ltr';
+    $('tw-title-text').textContent=T.t;
+    $('tw-lab-h').textContent=T.h;
+    $('tw-lab-m').textContent=T.m;
+    $('tw-lab-s').textContent=T.s;
+    $('tw-add').textContent=T.save;
+    $('tw-reset').textContent=T.reset;
+    if(mode==='idle'){main.textContent=T.start}
+    else if(mode==='running'){main.textContent=T.pauseBtn}
+    else if(mode==='paused'){main.textContent=T.resume}
+    else{main.textContent=T.stopBtn}
+    tLabel.textContent=testing?T.stopSnd:T.listen;
+    paintMute();
+    drawPresets();
+  }
+  function load(){
+    try{
+      var raw=localStorage.getItem(KEY);if(!raw)return;
+      var d=JSON.parse(raw);
+      if(typeof d.total==='number'&&d.total>0)total=d.total;
+      if(Array.isArray(d.presets))presets=d.presets;
+      if(d.lang)langPref=d.lang;
+      if(d.theme)themePref=d.theme;
+      if(d.font)fontPref=d.font;
+    }catch(e){}
+  }
+  function save(){try{localStorage.setItem(KEY,JSON.stringify({total:total,presets:presets,lang:langPref,theme:themePref,font:fontPref}))}catch(e){}}
+
+  function fmt(ms){
+    var neg=ms<0,t=Math.floor((Math.abs(ms)+(neg?999:0))/1000);
+    var h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60,p=function(n){return n<10?'0'+n:''+n};
+    return (neg?'-':'')+(h>0?h+':'+p(m)+':'+p(s):p(m)+':'+p(s));
+  }
+  function inputsSec(){
+    var h=parseInt($('tw-h').value||0,10),m=parseInt($('tw-m').value||0,10),s=parseInt($('tw-s').value||0,10);
+    return Math.max(0,(h||0)*3600+(m||0)*60+(s||0));
+  }
+  function setInputs(sec){$('tw-h').value=Math.floor(sec/3600);$('tw-m').value=Math.floor(sec%3600/60);$('tw-s').value=sec%60}
+
+  function ctx(){if(!ac)ac=new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();return ac}
+  function tone(f,at,dur,vol){
+    var a=ctx(),o=a.createOscillator(),g=a.createGain(),t0=a.currentTime+at;
+    o.type='sine';o.frequency.value=f;
+    g.gain.setValueAtTime(0.0001,t0);
+    g.gain.exponentialRampToValueAtTime(vol,t0+0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    o.connect(g);g.connect(a.destination);o.start(t0);o.stop(t0+dur+0.05);
+    nodes.push([o,g]);
+    o.onended=function(){for(var i=0;i<nodes.length;i++){if(nodes[i][0]===o){nodes.splice(i,1);break}}};
+  }
+  function hit(f,at,dur,vol){
+    tone(f,at,dur,vol);
+    tone(f*2,at,dur*0.4,vol*0.3);
+    tone(f*4.1,at,0.09,vol*0.12);
+  }
+  function playBuffer(){
+    var a=ctx(),src=a.createBufferSource(),g=a.createGain();
+    src.buffer=customBuf;g.gain.value=1;
+    src.connect(g);g.connect(a.destination);src.start();
+    nodes.push([src,g]);
+    src.onended=function(){for(var i=0;i<nodes.length;i++){if(nodes[i][0]===src){nodes.splice(i,1);break}}};
+  }
+  function alarmLen(){return customBuf?Math.round(customBuf.duration*1000):PHRASE}
+  function alarmGap(){return customBuf?Math.round(customBuf.duration*1000)+800:REPEAT}
+  function alarm(){
+    if(window.__native)return;
+    if(customBuf){try{playBuffer()}catch(e){}return}
+    try{
+      var S=0.17;
+      var N={c5:523.25,d5:587.33,e5:659.25,g5:783.99,a5:880,c6:1046.5,d6:1174.66,e6:1318.51,c3:130.81,g2:98,a2:110};
+      var mel=[
+        [0,N.c5],[1,N.e5],[2,N.g5],[3,N.e5],[4,N.a5],[5,N.g5],[6,N.e5],
+        [8,N.g5],[9,N.a5],[10,N.c6],[11,N.a5],[12,N.g5],[13,N.e5],[14,N.d5],
+        [16,N.c6],[17,N.d6],[18,N.e6],[20,N.c6],[22,N.g5],
+        [24,N.e5],[26,N.c5]
+      ];
+      mel.forEach(function(n,i){hit(n[1],n[0]*S,0.6,0.19-(i%2?0.03:0))});
+      [[0,N.c3],[8,N.a2],[16,N.g2],[24,N.c3]].forEach(function(b){tone(b[1],b[0]*S,1.1,0.13)});
+      tone(N.c5,26*S,1.8,0.1);
+      tone(N.g5,26*S,1.4,0.05);
+    }catch(e){}
+  }
+  function silence(){
+    try{
+      var now=ac?ac.currentTime:0;
+      nodes.forEach(function(n){
+        try{
+          n[1].gain.cancelScheduledValues(now);
+          n[1].gain.setValueAtTime(Math.max(n[1].gain.value,0.0001),now);
+          n[1].gain.exponentialRampToValueAtTime(0.0001,now+0.05);
+          n[0].stop(now+0.08);
+        }catch(e){}
+      });
+      nodes=[];
+    }catch(e){}
+  }
+  function endTest(){
+    testing=false;
+    if(testTimer){clearTimeout(testTimer);testTimer=null}
+    idleAudio();
+    tIcon.innerHTML=PLAY;tLabel.textContent='pos\u0142uchaj alarmu';
+  }
+  function stopBeeps(){if(beepTimer){clearInterval(beepTimer);beepTimer=null}}
+  function idleAudio(){
+    setTimeout(function(){
+      try{
+        if(ac&&!beepTimer&&!testing){
+          var old=ac;ac=null;nodes=[];
+          if(old.close)old.close();else old.suspend();
+        }
+      }catch(e){}
+    },250);
+  }
+
+  var pickPending=false;
+  function paint(left){
+    var txt=fmt(left);
+    tEl.textContent=txt;
+    if(left<0){
+      tEl.style.color=OVER;
+      arc.setAttribute('stroke',OVER);
+      arc.setAttribute('stroke-dashoffset','0');
+      sEl.textContent=T.over;
+      icon('over',1);
+      if(!pickPending){
+        var sel=$('tw-list'),si=(sel&&!$('tw-list-row').hidden)?sel.selectedIndex:-1;
+        document.title=txt+' '+T.over+(beepTimer?'':' |M')+' |S'+si;
+      }
+    }else{
+      tEl.style.color=FG;
+      arc.setAttribute('stroke',mode==='paused'?PAUSE:RUN);
+      var frac=total>0?left/(total*1000):0;
+      arc.setAttribute('stroke-dashoffset',(C*(1-frac)).toFixed(1));
+      sEl.textContent=mode==='running'?T.run:(mode==='paused'?T.pause:T.ready);
+      if(mode==='idle'){
+        icon('idle',0);
+        if(!pickPending)document.title=T.t+' |L'+total+(presets.length?','+presets.join(','):'');
+      }
+      else{icon(mode,frac);if(!pickPending)document.title=txt+(mode==='paused'?' |P':'')}
+    }
+  }
+  function loop(){
+    var left=endAt-Date.now();
+    if(mode==='running'&&left<=0){
+      mode='over';main.textContent=T.stopBtn;
+      if(!muted){alarm();beepTimer=setInterval(alarm,alarmGap())}
+      paintMute();
+    }
+    paint(left);
+  }
+  function start(){
+    silence();endTest();
+    if(mode==='idle'){total=inputsSec();if(total<=0)return;save();endAt=Date.now()+total*1000}
+    else if(mode==='paused'){endAt=Date.now()+leftPaused}
+    ctx();
+    try{ac.suspend()}catch(e){}
+    mode='running';setup.classList.add('tw-off');pbox.classList.add('tw-off');
+    main.textContent=T.pauseBtn;paintMute();
+    if(tick)clearInterval(tick);tick=setInterval(loop,100);loop();
+  }
+  function pause(){leftPaused=endAt-Date.now();idleAudio();mode='paused';main.textContent='Wzn\u00f3w';clearInterval(tick);tick=null;paint(leftPaused)}
+  function reset(){
+    clearInterval(tick);tick=null;stopBeeps();silence();endTest();idleAudio();mode='idle';
+    setup.classList.remove('tw-off');pbox.classList.remove('tw-off');
+    main.textContent=T.start;muted=false;paintMute();setInputs(total);paint(total*1000);
+  }
+  main.addEventListener('click',function(){
+    if(mode==='running')pause();
+    else if(mode==='over'){stopBeeps();silence();reset()}
+    else start();
+  });
+  $('tw-reset').addEventListener('click',reset);
+  test.addEventListener('click',function(){
+    if(window.__native){
+      if(testing){pickPending=true;document.title='__STOP__';endTest();
+        setTimeout(function(){pickPending=false;paint(mode==='idle'?total*1000:(endAt-Date.now()))},600);
+        return}
+      var sel=$('tw-list'),si=(sel&&!$('tw-list-row').hidden)?sel.selectedIndex:-1;
+      pickPending=true;document.title='__PLAY__ |S'+si+'|T'+Date.now();
+      testing=true;tIcon.innerHTML=STOP;tLabel.textContent=T.stopSnd;
+      setTimeout(function(){
+        pickPending=false;
+        paint(mode==='idle'?total*1000:(endAt-Date.now()));
+      },600);
+      return;
+    }
+    if(testing){silence();endTest();return}
+    ctx();alarm();testing=true;
+    tIcon.innerHTML=STOP;tLabel.textContent=T.stopSnd;
+    testTimer=setTimeout(endTest,alarmLen());
+  });
+  setup.addEventListener('click',function(e){
+    var b=e.target.closest('.tw-spin button');if(!b)return;
+    var el=$(b.dataset.t),d=parseInt(b.dataset.d,10);
+    var max=parseInt(el.max,10),v=parseInt(el.value||0,10)+d;
+    if(v<0)v=max; if(v>max)v=0;
+    el.value=v;total=inputsSec();paint(total*1000);save();
+  });
+  $('tw-add').addEventListener('click',function(){
+    var sec=(mode==='idle')?inputsSec():total;
+    if(sec>0&&presets.indexOf(sec)===-1){presets.push(sec);presets.sort(function(a,b){return a-b});save();drawPresets();paint(mode==='idle'?total*1000:(endAt-Date.now()))}
+  });
+  pbox.addEventListener('click',function(e){
+    var xhit=e.target.closest('.x');
+    if(xhit){
+      var v=parseInt(xhit.parentNode.dataset.sec,10);
+      presets=presets.filter(function(p){return p!==v});save();drawPresets();paint(mode==='idle'?total*1000:(endAt-Date.now()));
+      return;
+    }
+    var b=e.target.closest('.tw-pre');if(!b||!b.dataset.sec)return;
+    total=parseInt(b.dataset.sec,10);setInputs(total);paint(total*1000);save();
+  });
+  ['tw-h','tw-m','tw-s'].forEach(function(id){$(id).addEventListener('input',function(){total=inputsSec();paint(total*1000);save()})});
+  $('tw-lang').addEventListener('change',function(){
+    langPref=this.value;save();applyLang();paint(mode==='idle'?total*1000:(endAt-Date.now()));
+  });
+  $('tw-mute').addEventListener('click',function(){
+    muted=!muted;
+    if(muted){stopBeeps();silence();idleAudio()}
+    else if(mode==='over'){ctx();alarm();beepTimer=setInterval(alarm,alarmGap())}
+    paintMute();
+  });
+  $('tw-list').addEventListener('change',function(){
+    var f=folderFiles[parseInt(this.value,10)];
+    if(!f)return;
+    if(f.buf){customBuf=f.buf;customName=f.name;markCustom();silence();endTest();}
+    else useFile(f,true);
+  });
+  $('tw-default').addEventListener('click',function(){
+    if(!window.confirm(T.askDefault))return;
+    silence();endTest();customBuf=null;customName='';
+    try{localStorage.removeItem(AKEY);localStorage.removeItem(LKEY)}catch(e){}
+    folderFiles=[];$('tw-list').innerHTML='';$('tw-list-row').hidden=true;
+    markCustom();
+  });
+  $('tw-font').addEventListener('change',function(){
+    fontPref=this.value;save();applyFont();
+  });
+  $('tw-theme').addEventListener('change',function(){
+    themePref=this.value;save();applyTheme();paint(mode==='idle'?total*1000:(endAt-Date.now()));
+  });
+  if(window.matchMedia){
+    try{window.matchMedia('(prefers-color-scheme: light)').addEventListener('change',function(){
+      if(themePref==='auto'){applyTheme();paint(mode==='idle'?total*1000:(endAt-Date.now()))}
+    })}catch(e){}
+  }
+  function fitDial(){
+    var root=document.querySelector('.tw'),right=document.querySelector('.tw-right'),left=document.querySelector('.tw-left');
+    if(window.matchMedia('(min-width:820px) and (min-height:560px)').matches){
+      var titleH=document.querySelector('.tw-title').offsetHeight;
+      var gap=parseFloat(getComputedStyle(left).rowGap)||16;
+      var target=right.offsetHeight-titleH-gap;
+      var max=Math.min(window.innerHeight-120,window.innerWidth*0.42,560);
+      root.style.setProperty('--dial',Math.max(240,Math.min(target,max))+'px');
+    }else{
+      root.style.removeProperty('--dial');
+    }
+  }
+  window.addEventListener('resize',fitDial);
+
+  // --- most do aplikacji macOS (WKWebView nie obsluguje <input type=file>) ---
+  window.__native=/ProstyTimerApp/.test(navigator.userAgent);
+  window.__nativeMode=function(){window.__native=true};
+  // sygnał dla aplikacji: podmiana tytułu, którą skrypt wykrywa
+  window.__askFiles=function(){
+    document.title='__PICK__';
+  };
+  $('tw-hint').addEventListener('click',function(){
+    pickPending=true;
+    document.title='__PICK__';
+    setTimeout(function(){pickPending=false},4000);
+  });
+  window.__pickDone=function(){pickPending=false;document.title=T.t};
+  window.__cmd=function(c){
+    try{
+      if(typeof c==='number'){setInputs(c);total=c;paint(total*1000);$('tw-main').click();return}
+      if(c==='main')$('tw-main').click();
+      else if(c==='reset')$('tw-reset').click();
+      else if(c==='mute')$('tw-mute').click();
+    }catch(e){}
+  };
+  window.__loadAlarms=function(list,skipSave){
+    try{
+      if(!list||!list.length)return;
+      if(!skipSave){
+        try{localStorage.setItem(LKEY,JSON.stringify(list))}catch(e){}
+      }
+      folderFiles=[];
+      var pending=list.length;
+      list.forEach(function(it,i){
+        var bin=atob(it.data),len=bin.length,arr=new Uint8Array(len);
+        for(var k=0;k<len;k++)arr[k]=bin.charCodeAt(k);
+        ctx().decodeAudioData(arr.buffer,function(dec){
+          folderFiles.push({name:it.name,buf:dec});
+          if(--pending===0)finish();
+        },function(){if(--pending===0)finish()});
+      });
+      function finish(){
+        folderFiles.sort(function(a,b){return a.name.localeCompare(b.name)});
+        var sel=$('tw-list');sel.innerHTML='';
+        folderFiles.forEach(function(f,i){
+          var o=document.createElement('option');
+          o.value=String(i);o.textContent=f.name.replace(/\.[^.]+$/,'');
+          sel.appendChild(o);
+        });
+        $('tw-list-row').hidden=false;sel.selectedIndex=0;
+        customBuf=folderFiles[0].buf;customName=folderFiles[0].name;markCustom();
+      }
+    }catch(e){}
+  };
+  // wykrycie aplikacji: WKWebView nie ma "Safari" w identyfikatorze
+  load();applyTheme();applyFont();buildLangList();applyLang();setInputs(total);paint(total*1000);
+  loadStored();markCustom();
+  // lista dźwięków wraca z aplikacji (window.__loadAlarms), jeśli plik zapisu istnieje
+  fitDial();setTimeout(fitDial,60);
+})();
+</script>
+</body>
+</html>
