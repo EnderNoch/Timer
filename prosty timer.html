@@ -346,7 +346,7 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
     r.readAsArrayBuffer(f);
   }
   function markCustom(){
-    $('tw-default').hidden=!customBuf;
+    $('tw-default').hidden=!(customBuf||customName);
   }
   function loadArrayBuffer(buf,name,b64,persist){
     var a=ctx();
@@ -502,7 +502,7 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
     testing=false;
     if(testTimer){clearTimeout(testTimer);testTimer=null}
     idleAudio();
-    tIcon.innerHTML=PLAY;tLabel.textContent='pos\u0142uchaj alarmu';
+    tIcon.innerHTML=PLAY;tLabel.textContent=T.listen;
   }
   function stopBeeps(){if(beepTimer){clearInterval(beepTimer);beepTimer=null}}
   function idleAudio(){
@@ -528,7 +528,7 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
       icon('over',1);
       if(!pickPending){
         var sel=$('tw-list'),si=(sel&&!$('tw-list-row').hidden)?sel.selectedIndex:-1;
-        document.title=txt+' '+T.over+(beepTimer?'':' |M')+' |S'+si;
+        document.title=txt+' '+T.over+' |O'+(beepTimer?'':' |M')+' |S'+si;
       }
     }else{
       tEl.style.color=FG;
@@ -562,7 +562,7 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
     main.textContent=T.pauseBtn;paintMute();
     if(tick)clearInterval(tick);tick=setInterval(loop,100);loop();
   }
-  function pause(){leftPaused=endAt-Date.now();idleAudio();mode='paused';main.textContent='Wzn\u00f3w';clearInterval(tick);tick=null;paint(leftPaused)}
+  function pause(){leftPaused=endAt-Date.now();idleAudio();mode='paused';main.textContent=T.resume;clearInterval(tick);tick=null;paint(leftPaused)}
   function reset(){
     clearInterval(tick);tick=null;stopBeeps();silence();endTest();idleAudio();mode='idle';
     setup.classList.remove('tw-off');pbox.classList.remove('tw-off');
@@ -580,7 +580,7 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
         setTimeout(function(){pickPending=false;paint(mode==='idle'?total*1000:(endAt-Date.now()))},600);
         return}
       var sel=$('tw-list'),si=(sel&&!$('tw-list-row').hidden)?sel.selectedIndex:-1;
-      pickPending=true;document.title='__PLAY__ |S'+si+'|T'+Date.now();
+      pickPending=true;document.title='__PLAY__ |T'+Date.now()+' |S'+si;
       testing=true;tIcon.innerHTML=STOP;tLabel.textContent=T.stopSnd;
       setTimeout(function(){
         pickPending=false;
@@ -627,7 +627,9 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
   $('tw-list').addEventListener('change',function(){
     var f=folderFiles[parseInt(this.value,10)];
     if(!f)return;
-    if(f.buf){customBuf=f.buf;customName=f.name;markCustom();silence();endTest();}
+    silence();endTest();
+    if(f.native){customBuf=null;customName=f.name;markCustom();return}
+    if(f.buf){customBuf=f.buf;customName=f.name;markCustom()}
     else useFile(f,true);
   });
   $('tw-default').addEventListener('click',function(){
@@ -636,6 +638,11 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
     try{localStorage.removeItem(AKEY);localStorage.removeItem(LKEY)}catch(e){}
     folderFiles=[];$('tw-list').innerHTML='';$('tw-list-row').hidden=true;
     markCustom();
+    // aplikacja tez musi zapomniec wybrane pliki, inaczej dalej gralaby po sciezce
+    if(window.__native){
+      pickPending=true;document.title='__RESET__';
+      setTimeout(function(){pickPending=false;paint(mode==='idle'?total*1000:(endAt-Date.now()))},600);
+    }
   });
   $('tw-font').addEventListener('change',function(){
     fontPref=this.value;save();applyFont();
@@ -674,7 +681,8 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
     document.title='__PICK__';
     setTimeout(function(){pickPending=false},4000);
   });
-  window.__pickDone=function(){pickPending=false;document.title=T.t};
+  // tytul musi wrocic ze znacznikami (|L...), inaczej pasek menu wezmie go za czas
+  window.__pickDone=function(){pickPending=false;paint(mode==='idle'?total*1000:(endAt-Date.now()))};
   window.__cmd=function(c){
     try{
       if(typeof c==='number'){setInputs(c);total=c;paint(total*1000);$('tw-main').click();return}
@@ -683,31 +691,33 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
       else if(c==='mute')$('tw-mute').click();
     }catch(e){}
   };
+  // kolejnosc listy ustala aplikacja - strona jej nie zmienia,
+  // inaczej indeks |S w tytule wskazywalby inny plik niz gra skrypt
   window.__loadAlarms=function(list,skipSave){
     try{
       if(!list||!list.length)return;
       if(!skipSave){
         try{localStorage.setItem(LKEY,JSON.stringify(list))}catch(e){}
       }
-      folderFiles=[];
-      var pending=list.length;
+      // w aplikacji dzwiek gra skrypt (z pliku), stronie wystarczaja same nazwy
+      if(window.__native||!list[0].data){
+        folderFiles=list.map(function(it){return {name:it.name,buf:null,native:true}});
+        finish();
+        return;
+      }
+      var out=new Array(list.length),pending=list.length;
       list.forEach(function(it,i){
         var bin=atob(it.data),len=bin.length,arr=new Uint8Array(len);
         for(var k=0;k<len;k++)arr[k]=bin.charCodeAt(k);
         ctx().decodeAudioData(arr.buffer,function(dec){
-          folderFiles.push({name:it.name,buf:dec});
-          if(--pending===0)finish();
-        },function(){if(--pending===0)finish()});
+          out[i]={name:it.name,buf:dec};
+          if(--pending===0){folderFiles=out.filter(function(f){return f});finish()}
+        },function(){if(--pending===0){folderFiles=out.filter(function(f){return f});finish()}});
       });
       function finish(){
-        folderFiles.sort(function(a,b){return a.name.localeCompare(b.name)});
-        var sel=$('tw-list');sel.innerHTML='';
-        folderFiles.forEach(function(f,i){
-          var o=document.createElement('option');
-          o.value=String(i);o.textContent=f.name.replace(/\.[^.]+$/,'');
-          sel.appendChild(o);
-        });
-        $('tw-list-row').hidden=false;sel.selectedIndex=0;
+        if(!folderFiles.length)return;
+        buildList();
+        $('tw-list').selectedIndex=0;
         customBuf=folderFiles[0].buf;customName=folderFiles[0].name;markCustom();
       }
     }catch(e){}
