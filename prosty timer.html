@@ -65,15 +65,15 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
 .tw-dial-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--digits) * 0.12)}
 #tw-time{font-size:var(--digits);font-weight:500;font-variant-numeric:tabular-nums;color:var(--fg);line-height:1.1}
 #tw-state{font-size:calc(var(--digits) * 0.32);color:var(--muted)}
-@media (min-width:820px) and (min-height:560px){
+@media (min-width:820px) and (min-height:430px){
   .tw{flex-direction:row;align-items:center;gap:clamp(36px,7vw,140px)}
   .tw-right{max-height:calc(100vh - 48px)}
 }
 .tw input,.tw button,.tw select{font-family:inherit}
-.tw button,.tw-field,.tw select{box-sizing:border-box;height:var(--h);width:var(--w);padding:0 12px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--fg);font-size:var(--fs);display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:background 0.12s,border-color 0.12s;overflow:hidden;white-space:nowrap}
-.tw button:hover,.tw-field:hover,.tw select:hover{background:var(--hover);border-color:var(--hoverline)}
+.tw button,.tw-field,.tw select{box-sizing:border-box;height:var(--h);width:var(--w);padding:0 12px;border:1px solid var(--line);border-radius:8px;background-color:transparent;color:var(--fg);font-size:var(--fs);display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:background 0.12s,border-color 0.12s;overflow:hidden;white-space:nowrap}
+.tw button:hover,.tw-field:hover,.tw select:hover{background-color:var(--hover);border-color:var(--hoverline)}
 .tw button:focus-visible,.tw-field:focus-within,.tw select:focus-visible{outline:none;border-color:var(--focusline);box-shadow:0 0 0 2px var(--focus)}
-.tw button:active{background:var(--active)}
+.tw button:active{background-color:var(--active)}
 .tw-row{display:flex;gap:var(--g);flex-wrap:wrap;justify-content:center;align-items:center;width:var(--full)}
 .tw button.tw-full{width:var(--full)}
 .tw select{width:var(--full);font-size:var(--fs);text-align:center;text-align-last:center}
@@ -111,6 +111,180 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
 .tw-spin button{height:calc(var(--h) * 0.4);width:22px;padding:0;border:0;border-radius:4px;opacity:0.6;gap:0}
 .tw-spin button:hover{opacity:1;background:var(--hover);border:0}
 </style>
+<style>
+/* ---------- Liquid Glass (macOS 26) ----------------------------------
+   Tafla szkła to: wypełnienie + rozmycie tego, co pod spodem + refleks na
+   górnej krawędzi + cienki rant + miękki cień. Kształt kapsuły — tak Apple
+   rysuje dziś przyciski.
+
+   W aplikacji (data-glass="1") tło strony znika, bo prawdziwe szkło rysuje
+   pod WKWebView systemowy NSGlassEffectView. W przeglądarce tło zostaje,
+   a rozmycie ma co brać z poświaty malowanej przez body::before.
+   -------------------------------------------------------------------- */
+:root,html[data-theme="dark"]{
+  --glass:rgba(255,255,255,0.10);--glass-strong:rgba(255,255,255,0.15);
+  --rim:rgba(255,255,255,0.18);--spec:rgba(255,255,255,0.42);
+  --shade:0 1px 2px rgba(0,0,0,0.18);
+  --dialface:rgba(43,33,64,0.46);
+  --blob-a:rgba(122,69,201,0.45);--blob-b:rgba(56,120,210,0.28);
+  --legible:0 1px 14px rgba(0,0,0,0.45);
+  --blur:22px;
+  /* znaczek listy rozwijanej: podkladka + dwa daszki, jak w macOS 26 */
+  --chev:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Crect width='22' height='22' rx='6' fill='%23ffffff' fill-opacity='.16'/%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.9' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.6 9.3 11 6l3.4 3.3'/%3E%3Cpath d='M7.6 12.7 11 16l3.4-3.3'/%3E%3C/g%3E%3C/svg%3E");
+  /* promien kontrolek: 999px to kapsula, ~10px to zaokraglony prostokat */
+  --r:999px;
+  /* znaczek listy rozwijanej: podkladka + dwa daszki, jak w macOS 26 */
+}
+html[data-theme="light"]{
+  --glass:rgba(255,255,255,0.52);--glass-strong:rgba(255,255,255,0.64);
+  --rim:rgba(255,255,255,0.85);--spec:rgba(255,255,255,1);
+  --shade:0 1px 2px rgba(60,40,100,0.12);
+  --dialface:rgba(255,255,255,0.55);
+  --blob-a:rgba(140,110,230,0.30);--blob-b:rgba(120,180,235,0.26);
+  --legible:0 1px 12px rgba(255,255,255,0.75);
+  --chev:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Crect width='22' height='22' rx='6' fill='%231B1526' fill-opacity='.12'/%3E%3Cg fill='none' stroke='%231B1526' stroke-opacity='.85' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.6 9.3 11 6l3.4 3.3'/%3E%3Cpath d='M7.6 12.7 11 16l3.4-3.3'/%3E%3C/g%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme:light){
+  html[data-theme="auto"]{
+    --glass:rgba(255,255,255,0.52);--glass-strong:rgba(255,255,255,0.64);
+    --rim:rgba(255,255,255,0.85);--spec:rgba(255,255,255,1);
+    --shade:0 1px 2px rgba(60,40,100,0.12);
+    --dialface:rgba(255,255,255,0.55);
+    --blob-a:rgba(140,110,230,0.30);--blob-b:rgba(120,180,235,0.26);
+    --legible:0 1px 12px rgba(255,255,255,0.75);
+  --chev:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Crect width='22' height='22' rx='6' fill='%231B1526' fill-opacity='.12'/%3E%3Cg fill='none' stroke='%231B1526' stroke-opacity='.85' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.6 9.3 11 6l3.4 3.3'/%3E%3Cpath d='M7.6 12.7 11 16l3.4-3.3'/%3E%3C/g%3E%3C/svg%3E");
+  }
+}
+
+/* poświata pod szkłem: bez niej rozmycie nie miałoby czego rozmywać */
+html{background:var(--bg)}
+body{background:transparent}
+body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(38% 38% at 22% 26%,var(--blob-a),transparent 68%),
+    radial-gradient(34% 34% at 24% 86%,var(--blob-b),transparent 70%);
+  filter:blur(50px)}
+
+/* przyciski, pola i listy: kapsuły ze szkła */
+.tw button,.tw-field,.tw select{
+  border:0;border-radius:var(--r);
+  background-color:var(--glass);
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(180%);
+  backdrop-filter:blur(var(--blur)) saturate(180%);
+  box-shadow:inset 0 1px 0 var(--spec),inset 0 0 0 1px var(--rim),var(--shade);
+  transition:background-color 0.18s ease,box-shadow 0.18s ease,transform 0.1s ease}
+.tw button:hover,.tw-field:hover,.tw select:hover{
+  background-color:var(--hover);
+  box-shadow:inset 0 1px 0 var(--spec),inset 0 0 0 1px var(--hoverline),var(--shade)}
+.tw button:active{background-color:var(--active);transform:scale(0.97)}
+.tw button:focus-visible,.tw-field:focus-within,.tw select:focus-visible{
+  outline:none;
+  box-shadow:inset 0 1px 0 var(--spec),inset 0 0 0 1px var(--focusline),
+             0 0 0 3px var(--focus),var(--shade)}
+
+/* Menu systemowe macOS otwiera się 13 px na lewo od kontrolki — to stała
+   w silniku i strona nie ma jak jej ruszyć. Więc kapsułę rysuje otoczka,
+   a samo <select> siedzi w niej przezroczyste i przesunięte o 13 px w prawo:
+   system odejmuje swoje 13 px od przesuniętej listy i menu wypada dokładnie
+   na kapsule. Otoczka tnie to, co przez przesunięcie wystaje w prawo. */
+.tw-sel{
+  --shift:13px;
+  /* Menu przykleja się górą do górnej krawędzi listy, zamiast wyśrodkować
+     się na niej. Pozycja w menu ma około 33 px, więc lista musi zjechać
+     o połowę różnicy między własną wysokością a tymi 33 px. */
+  --vshift:calc((var(--h) - 33px) / 2);
+  position:relative;box-sizing:border-box;
+  display:inline-flex;align-items:center;
+  height:var(--h);width:var(--full);
+  border-radius:10px;overflow:hidden;cursor:pointer;
+  background-color:var(--glass);
+  background-image:var(--chev);
+  background-repeat:no-repeat;
+  background-position:right 7px center;
+  background-size:22px 22px;
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(180%);
+  backdrop-filter:blur(var(--blur)) saturate(180%);
+  box-shadow:inset 0 1px 0 var(--spec),inset 0 0 0 1px var(--rim),var(--shade);
+  transition:background-color 0.18s ease,box-shadow 0.18s ease}
+.tw-sel:hover{
+  background-color:var(--hover);
+  box-shadow:inset 0 1px 0 var(--spec),inset 0 0 0 1px var(--hoverline),var(--shade)}
+.tw-sel-half{width:var(--w);background-position:right 5px center;background-size:18px 18px}
+.tw-sel[hidden]{display:none}
+
+/* Napis listy trafia tam, gdzie napis w otwartym menu (13 px przesunięcia
+   plus szerokość kolumny na ptaszek). Prawe dopełnienie ma o te 13 px
+   więcej, bo prawa krawędź listy leży poza kapsułą. */
+.tw .tw-sel select{
+  position:absolute;top:var(--vshift);left:var(--shift);
+  width:100%;height:100%;margin:0;
+  -webkit-appearance:none;appearance:none;
+  text-align:left;text-align-last:left;
+  /* Lista zjechała w dół, więc napis pojechał razem z nią. Dopełnienie od
+     dołu, dwa razy zjazd, ścieśnia pole tekstu od spodu i wypycha napis
+     z powrotem na środek kapsuły. Menu tego nie dotyczy — ono liczy się
+     z ramki listy, a ta zostaje przesunięta. */
+  padding:0 43px calc(var(--vshift) * 2) 14px;
+  border:0;border-radius:0;
+  background:transparent;box-shadow:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none}
+.tw .tw-sel-half select{padding:0 36px calc(var(--vshift) * 2) 14px}
+.tw .tw-sel select:hover,.tw .tw-sel select:focus,.tw .tw-sel select:focus-visible{
+  background:transparent;box-shadow:none;outline:none}
+
+/* „+ zapisz czas” zostaje przerywany — rant kreską zamiast obramowania */
+#tw-add{background:transparent;box-shadow:none;
+  outline:1px dashed var(--ghost);outline-offset:-1px}
+#tw-add:hover{background:var(--hover);box-shadow:none;outline-color:var(--hoverline)}
+
+/* krzyżyk presetu siedział na łuku kapsuły — odsuwam go od krawędzi */
+.tw button.tw-pre{padding-right:11px}
+.tw-pre .x{width:22px;height:22px;border-radius:7px}
+.tw-ghost{border-radius:var(--r)}
+
+/* strzałki w polach czasu i krzyżyk presetu siedzą już na szkle pola */
+.tw-spin button,.tw-spin button:hover{
+  background:transparent;box-shadow:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none}
+.tw-spin button:hover{background:var(--hover)}
+.tw-pre .x{border-radius:999px}
+
+/* Niskie okno: lewa kolumna nie kurczy się poniżej tarczy (tarcza wychodziła
+   poza nią i lądowała na polach czasu), a gdy treść się nie mieści, całość
+   się przewija zamiast nachodzić */
+.tw-left{flex:0 0 auto}
+
+/* Wąskie okno: kolumna kontrolek brała 26vw, więc przy 419 px opadała na
+   swoje minimum 272 px i marnowała ~100 px, które okno miało. Napis
+   „OpenDyslexic” potrzebuje 171 px, a dostawał 132. Teraz bierze tyle,
+   ile okno daje — nadal nie więcej niż 400 px. Odjęte 48 px to boczne
+   dopełnienie .tw plus zapas na pasek przewijania listy presetów. */
+.tw{--full:clamp(272px,calc(100vw - 48px),400px);overflow-x:hidden;overflow-y:auto}
+
+/* Odstęp między tarczą a kontrolkami: 7vw dawało 118 px na szerokim ekranie */
+@media (min-width:820px) and (min-height:430px){
+  .tw{gap:clamp(28px,4vw,72px)}
+}
+
+/* tarcza: szklany krążek pod pierścieniem */
+.tw-dial svg{position:relative;z-index:1}
+.tw-dial-text{z-index:2}
+.tw-dial-glass{position:absolute;left:7.3%;top:7.3%;width:85.4%;height:85.4%;
+  border-radius:50%;z-index:0;pointer-events:none;
+  background:var(--glass-strong);
+  -webkit-backdrop-filter:blur(30px) saturate(180%);
+  backdrop-filter:blur(30px) saturate(180%);
+  box-shadow:inset 0 2px 0 var(--spec),inset 0 0 0 1px var(--rim),
+             inset 0 -24px 48px rgba(0,0,0,0.10),0 10px 30px rgba(0,0,0,0.18)}
+.tw-dial svg circle:first-of-type{fill:var(--dialface)}
+#tw-arc{filter:drop-shadow(0 0 8px var(--glow))}
+
+/* okno aplikacji ze szkłem: strona schodzi z drogi, zostaje sam tekst */
+html[data-glass="1"],html[data-glass="1"] body{background:transparent}
+html[data-glass="1"] body::before{display:none}
+html[data-glass="1"] #tw-time,html[data-glass="1"] #tw-state,
+html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
+</style>
 </head>
 <body>
 <div class="tw">
@@ -118,6 +292,7 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
   <div class="tw-title"><span id="tw-title-text">Prosty timer</span></div>
 
   <div class="tw-dial">
+    <div class="tw-dial-glass" aria-hidden="true"></div>
     <svg viewBox="0 0 260 260">
       <circle cx="130" cy="130" r="111" fill="var(--face)"></circle>
       <circle cx="130" cy="130" r="116" fill="none" stroke="var(--track)" stroke-width="10"></circle>
@@ -171,7 +346,7 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
   </div>
 
   <div class="tw-row" id="tw-list-row" hidden>
-    <select id="tw-list"></select>
+    <span class="tw-sel"><select id="tw-list"></select></span>
   </div>
 
   <div class="tw-row">
@@ -185,19 +360,19 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
   </div>
 
   <div class="tw-row">
-    <select id="tw-lang" aria-label="Język"></select>
+    <span class="tw-sel"><select id="tw-lang" aria-label="Język"></select></span>
   </div>
 
   <div class="tw-row">
-    <select id="tw-theme" aria-label="Motyw">
+    <span class="tw-sel tw-sel-half"><select id="tw-theme" aria-label="Motyw">
       <option value="auto">Auto</option>
       <option value="dark">Dark</option>
       <option value="light">Light</option>
-    </select>
-    <select id="tw-font" aria-label="Font">
+    </select></span>
+    <span class="tw-sel tw-sel-half"><select id="tw-font" aria-label="Font">
       <option value="dys">OpenDyslexic</option>
       <option value="sys">Systemowy</option>
-    </select>
+    </select></span>
   </div>
 
   <div class="tw-row" id="tw-presets"></div>
@@ -528,7 +703,7 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
       icon('over',1);
       if(!pickPending){
         var sel=$('tw-list'),si=(sel&&!$('tw-list-row').hidden)?sel.selectedIndex:-1;
-        document.title=txt+' '+T.over+' |O'+(beepTimer?'':' |M')+' |S'+si;
+        chan(txt+' '+T.over+' |O'+(beepTimer?'':' |M')+' |S'+si);
       }
     }else{
       tEl.style.color=FG;
@@ -538,9 +713,9 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
       sEl.textContent=mode==='running'?T.run:(mode==='paused'?T.pause:T.ready);
       if(mode==='idle'){
         icon('idle',0);
-        if(!pickPending)document.title=T.t+' |L'+total+(presets.length?','+presets.join(','):'');
+        if(!pickPending)chan(T.t+' |L'+total+(presets.length?','+presets.join(','):''));
       }
-      else{icon(mode,frac);if(!pickPending)document.title=txt+(mode==='paused'?' |P':'')}
+      else{icon(mode,frac);if(!pickPending)chan(txt+(mode==='paused'?' |P':''))}
     }
   }
   function loop(){
@@ -576,11 +751,11 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
   $('tw-reset').addEventListener('click',reset);
   test.addEventListener('click',function(){
     if(window.__native){
-      if(testing){pickPending=true;document.title='__STOP__';endTest();
+      if(testing){pickPending=true;chan('__STOP__');endTest();
         setTimeout(function(){pickPending=false;paint(mode==='idle'?total*1000:(endAt-Date.now()))},600);
         return}
       var sel=$('tw-list'),si=(sel&&!$('tw-list-row').hidden)?sel.selectedIndex:-1;
-      pickPending=true;document.title='__PLAY__ |T'+Date.now()+' |S'+si;
+      pickPending=true;chan('__PLAY__ |T'+Date.now()+' |S'+si);
       testing=true;tIcon.innerHTML=STOP;tLabel.textContent=T.stopSnd;
       setTimeout(function(){
         pickPending=false;
@@ -640,7 +815,7 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
     markCustom();
     // aplikacja tez musi zapomniec wybrane pliki, inaczej dalej gralaby po sciezce
     if(window.__native){
-      pickPending=true;document.title='__RESET__';
+      pickPending=true;chan('__RESET__');
       setTimeout(function(){pickPending=false;paint(mode==='idle'?total*1000:(endAt-Date.now()))},600);
     }
   });
@@ -669,16 +844,51 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
   }
   window.addEventListener('resize',fitDial);
 
+  // po wyborze z listy ognisko ma odejsc razem z menu
+  document.addEventListener('change',function(e){
+    var t=e.target;
+    if(t&&t.tagName==='SELECT'&&typeof t.blur==='function')t.blur();
+  });
+
+  // Lista rozwijana trzyma ognisko po kliknieciu i obwodka zostaje nawet
+  // wtedy, gdy mysz poszla gdzie indziej. Klikniecie poza kontrolke ma je
+  // oddawac - obwodka nalezy sie klawiaturze, nie myszy.
+  document.addEventListener('mousedown',function(e){
+    var a=document.activeElement;
+    if(!a||a===document.body)return;
+    if(a===e.target||a.contains(e.target))return;
+    if(typeof a.blur==='function')a.blur();
+  },true);
+
   // --- most do aplikacji macOS (WKWebView nie obsluguje <input type=file>) ---
+  // Kanal do aplikacji. Tytul zostaje (widac go w przegladarce), ale
+  // aplikacji nie kaze sie juz o niego dopytywac: WKWebView sam ja wola.
+  // Wysylka tylko przy faktycznej zmianie - paint() chodzi 10 razy na
+  // sekunde, a stan zmienia sie najwyzej raz.
+  var lastChan='';
+  function chan(t){
+    if(t===lastChan)return;
+    lastChan=t;
+    document.title=t;
+    try{
+      var h=window.webkit&&window.webkit.messageHandlers&&window.webkit.messageHandlers.timer;
+      if(h)h.postMessage(t);
+    }catch(e){}
+  }
   window.__native=/ProstyTimerApp/.test(navigator.userAgent);
   window.__nativeMode=function(){window.__native=true};
+  // tlo okna rysuje aplikacja (NSGlassEffectView) - strona ma zejsc z drogi
+  window.__glass=function(on){
+    document.documentElement.setAttribute('data-glass',on?'1':'0');
+    if(typeof fitDial==='function')setTimeout(fitDial,0);
+  };
   // sygnał dla aplikacji: podmiana tytułu, którą skrypt wykrywa
   window.__askFiles=function(){
-    document.title='__PICK__';
+    chan('__PICK__');
   };
   $('tw-hint').addEventListener('click',function(){
     pickPending=true;
-    document.title='__PICK__';
+    chan('__PICK__');
     setTimeout(function(){pickPending=false},4000);
   });
   // tytul musi wrocic ze znacznikami (|L...), inaczej pasek menu wezmie go za czas

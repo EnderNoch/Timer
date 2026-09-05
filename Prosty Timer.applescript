@@ -17,6 +17,10 @@ property alarmSound : missing value
 property testPlaying : false
 property lastToken : ""
 property soundPaths : {}
+-- tlo okna: "system" zwykle okno (szklo tylko na kontrolkach strony),
+-- "liquid" NSGlassEffectView na cale okno, "frost" NSVisualEffectView
+property glassMode : "liquid"
+property glassItems : {}
 
 -- sciezki i ustawienia
 property supportDir : ""
@@ -106,14 +110,21 @@ on buildWindow()
 	set cfg to current application's WKWebViewConfiguration's alloc()'s init()
 	-- trwaly magazyn danych: bez tego localStorage znika po zamknieciu
 	cfg's setWebsiteDataStore:(current application's WKWebsiteDataStore's defaultDataStore())
+	-- most JS -> aplikacja. Strona sama zglasza zmiane stanu, wiec nic tu
+	-- nie chodzi w kolko: przy nieruszonym timerze aplikacja nie robi nic.
+	cfg's userContentController()'s addScriptMessageHandler:me |name|:"timer"
 	set webV to current application's WKWebView's alloc()'s ¬
 		initWithFrame:frameRect configuration:cfg
 	
 	-- wlasny identyfikator, po ktorym strona pozna, ze dziala w aplikacji
 	webV's setCustomUserAgent:"ProstyTimerApp"
 	
+	webV's setAutoresizingMask:18
 	webV's loadFileURL:theURL allowingReadAccessToURL:theDir
-	win's setContentView:webV
+	
+	-- tlo okna (szklo albo zwykle) i wpiecie w nie strony
+	my applyGlass()
+	
 	win's makeKeyAndOrderFront:me
 	current application's NSApp's activateIgnoringOtherApps:true
 end buildWindow
@@ -126,6 +137,133 @@ on reloadPage:sender
 	webV's loadFileURL:(current application's NSURL's fileURLWithPath:htmlPath) ¬
 		allowingReadAccessToURL:(current application's NSURL's fileURLWithPath:htmlDir)
 end reloadPage:
+
+-- ---------- tlo okna: Liquid Glass ----------
+
+-- Domyslnie ("system") okno jest zwyklym oknem, a szklo siedzi tylko na
+-- kontrolkach strony - tak Apple to rozpisuje: szklo to warstwa plywajaca
+-- nad trescia, nie tlo na cale okno.
+-- "liquid" i "frost" robia z calego okna tafle: pierwsze przez
+-- NSGlassEffectView (macOS 26), drugie przez starsze NSVisualEffectView.
+on applyGlass()
+	if win is missing value or webV is missing value then return
+	
+	set szklo to (glassMode is not "system")
+	set clearC to current application's NSColor's clearColor()
+	set solidC to current application's NSColor's windowBackgroundColor()
+	
+	-- Pasek tytulu zostaje paskiem tytulu. Probowalem wpuscic szklo pod niego
+	-- (fullSizeContentView), ale wtedy strona wchodzi pod przyciski okna
+	-- i przykrywa jedyne miejsce, za ktore mozna okno zlapac - WKWebView
+	-- polyka ruchy myszy, wiec okna nie dalo sie przesunac.
+	if szklo then
+		win's setOpaque:false
+		win's setBackgroundColor:clearC
+	else
+		win's setOpaque:true
+		win's setBackgroundColor:solidC
+	end if
+	
+	-- WKWebView domyslnie maluje wlasne, kryjace tlo; bez tego szkla nie widac
+	try
+		webV's setValue:(current application's NSNumber's numberWithBool:(not szklo)) forKey:"drawsBackground"
+	end try
+	try
+		if szklo then
+			webV's setUnderPageBackgroundColor:clearC
+		else
+			webV's setUnderPageBackgroundColor:solidC
+		end if
+	end try
+	
+	try
+		webV's removeFromSuperview()
+	end try
+	
+	set bg to my makeBackdrop()
+	if bg is missing value then
+		win's setContentView:webV
+	else
+		win's setContentView:bg
+		-- NSGlassEffectView reczy tylko za contentView: reszta podwidokow
+		-- moze wyladowac nad szklem albo pod nim. NSVisualEffectView
+		-- takiego wejscia nie ma, tam strona idzie zwyklym podwidokiem.
+		if (bg's respondsToSelector:"setContentView:") as boolean then
+			bg's setContentView:webV
+		else
+			bg's addSubview:webV
+		end if
+		webV's setFrame:(bg's |bounds|())
+	end if
+	webV's setAutoresizingMask:18
+	
+	my tellGlass()
+end applyGlass
+
+on makeBackdrop()
+	if glassMode is "system" then return missing value
+	
+	if glassMode is "liquid" then
+		set cls to current application's NSClassFromString("NSGlassEffectView")
+		if cls is not missing value then
+			set v to cls's alloc()'s init()
+			-- 0 = NSGlassEffectViewStyle.regular (czytelne tlo pod trescia)
+			try
+				v's setStyle:0
+			end try
+			-- rogi obcina samo okno, szklo ma isc na wylot
+			try
+				v's setCornerRadius:0
+			end try
+			return v
+		end if
+	end if
+	
+	set cls to current application's NSClassFromString("NSVisualEffectView")
+	if cls is missing value then return missing value
+	set v to cls's alloc()'s init()
+	-- 21 = NSVisualEffectMaterialUnderWindowBackground, 0 = rozmycie tego,
+	-- co za oknem, 1 = zawsze aktywne (takze gdy okno nie jest na wierzchu)
+	v's setMaterial:21
+	v's setBlendingMode:0
+	v's setState:1
+	return v
+end makeBackdrop
+
+-- strona musi wiedziec, czy ma byc przezroczysta
+on tellGlass()
+	if webV is missing value then return
+	set v to "0"
+	if glassMode is not "system" then set v to "1"
+	try
+		webV's evaluateJavaScript:("window.__glass&&window.__glass(" & v & ")") ¬
+			completionHandler:(missing value)
+	end try
+end tellGlass
+
+on setGlass:sender
+	try
+		set m to (sender's representedObject()) as text
+	on error
+		return
+	end try
+	if m is glassMode then return
+	set my glassMode to m
+	my savePrefs()
+	my applyGlass()
+	my syncGlassMenu()
+end setGlass:
+
+on syncGlassMenu()
+	repeat with gi in glassItems
+		set mi to contents of gi
+		if ((mi's representedObject()) as text) is glassMode then
+			mi's setState:1
+		else
+			mi's setState:0
+		end if
+	end repeat
+end syncGlassMenu
 
 -- ---------- pasek menu ----------
 
@@ -146,27 +284,29 @@ on buildStatusItem()
 	btn's setTarget:me
 	btn's setAction:"toggleWindow:"
 	btn's sendActionOn:2
-	
-	-- odpytywanie strony o czas
-	current application's NSTimer's ¬
-		scheduledTimerWithTimeInterval:0.2 target:me ¬
-			selector:"tickStatus:" userInfo:(missing value) repeats:true
 end buildStatusItem
 
--- Tytul strony to kanal sterowania. Znaczniki sa jezykowo neutralne:
--- |L czasy w spoczynku, |P pauza, |O po czasie, |M wyciszone, |S numer dzwieku.
-on tickStatus:sender
+-- ---------- most ze strony ----------
+
+-- Strona wola tu sama, gdy zmieni sie stan (window.webkit.messageHandlers).
+on userContentController:ucc didReceiveScriptMessage:msg
 	try
-		set t to (webV's title) as text
+		set t to (msg's |body|()) as text
 	on error
 		return
 	end try
-	
-	-- "|L" pojawia sie dopiero, gdy skrypt strony ruszyl; sam tytul z <head>
-	-- przychodzi wczesniej i wtedy window.__loadAlarms jeszcze nie istnieje
+	my handleState(t)
+end userContentController:didReceiveScriptMessage:
+
+-- Stan strony w jednym ciagu znakow. Znaczniki sa jezykowo neutralne:
+-- |L czasy w spoczynku, |P pauza, |O po czasie, |M wyciszone, |S numer dzwieku.
+on handleState(t)
+	-- pierwszy komunikat ze znacznikiem "|L" znaczy, ze skrypt strony ruszyl
+	-- i window.__loadAlarms juz istnieje
 	if restored is false and t contains "|L" then
 		set my restored to true
 		my restoreSounds()
+		my tellGlass()
 	end if
 	
 	-- przycisk dzwiekow w oknie prosi o wybor plikow
@@ -245,7 +385,7 @@ on tickStatus:sender
 	set aStr to current application's NSAttributedString's alloc()'s ¬
 		initWithString:t attributes:attrs
 	btn's setAttributedTitle:aStr
-end tickStatus:
+end handleState
 
 on buildMenu()
 	set mainMenu to current application's NSMenu's alloc()'s init()
@@ -271,6 +411,28 @@ on buildMenu()
 		initWithTitle:"Przeładuj stronę" action:"reloadPage:" keyEquivalent:"r"
 	reloadItem's setTarget:me
 	appMenu's addItem:reloadItem
+	
+	-- tlo okna: szklo systemu albo zwykle
+	appMenu's addItem:(current application's NSMenuItem's separatorItem())
+	set bgItem to current application's NSMenuItem's alloc()'s ¬
+		initWithTitle:"Tło okna" action:(missing value) keyEquivalent:""
+	set bgMenu to current application's NSMenu's alloc()'s init()
+	set lista to {}
+	repeat with pair in {{"Jak w systemie", "system"}, {"Szkło na całe okno (Liquid Glass)", "liquid"}, {"Szkło matowe na całe okno", "frost"}}
+		set p to contents of pair
+		set mi to current application's NSMenuItem's alloc()'s ¬
+			initWithTitle:(item 1 of p) action:"setGlass:" keyEquivalent:""
+		mi's setTarget:me
+		mi's setRepresentedObject:(item 2 of p)
+		bgMenu's addItem:mi
+		set end of lista to mi
+	end repeat
+	set my glassItems to lista
+	bgItem's setSubmenu:bgMenu
+	appMenu's addItem:bgItem
+	my syncGlassMenu()
+	
+	appMenu's addItem:(current application's NSMenuItem's separatorItem())
 	
 	-- Cmd+Q konczy aplikacje
 	set quitItem to current application's NSMenuItem's alloc()'s ¬
@@ -469,6 +631,8 @@ on loadPrefs()
 		if d is missing value then return
 		set v to (d's objectForKey:"htmlPath")
 		if v is not missing value then set my htmlPath to (v as text)
+		set g to (d's objectForKey:"glassMode")
+		if g is not missing value then set my glassMode to (g as text)
 	end try
 end loadPrefs
 
@@ -477,6 +641,7 @@ on savePrefs()
 		my ensureDir(supportDir)
 		set d to current application's NSMutableDictionary's dictionary()
 		d's setObject:htmlPath forKey:"htmlPath"
+		d's setObject:glassMode forKey:"glassMode"
 		d's writeToFile:prefStore atomically:true
 	end try
 end savePrefs
