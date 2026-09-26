@@ -152,17 +152,27 @@ on applyGlass()
 	set clearC to current application's NSColor's clearColor()
 	set solidC to current application's NSColor's windowBackgroundColor()
 	
-	-- Pasek tytulu zostaje paskiem tytulu. Probowalem wpuscic szklo pod niego
-	-- (fullSizeContentView), ale wtedy strona wchodzi pod przyciski okna
-	-- i przykrywa jedyne miejsce, za ktore mozna okno zlapac - WKWebView
-	-- polyka ruchy myszy, wiec okna nie dalo sie przesunac.
+	-- Szklo idzie na cale okno, takze pod pasek tytulu (fullSizeContentView),
+	-- a strona siedzi PONIZEJ paska. W macOS 27 pasek nad niekryjacym oknem
+	-- nie maluje wlasnego tla, wiec nazwa i przyciski okna wisialy na golym
+	-- pulpicie; pusty toolbar nie pomogl, bo tafle dostaja dopiero jego
+	-- elementy. Pierwsza proba z fullSizeContentView polegla na tym, ze
+	-- strona wchodzila pod pasek - WKWebView polyka mysz i okna nie dalo sie
+	-- zlapac. Tu strona konczy sie pod paskiem, a pas nad nia to sama tafla,
+	-- ktora pozwala przesuwac okno (mouseDownCanMoveWindow).
+	set ramka to win's frame()
 	if szklo then
+		win's setStyleMask:(15 + 32768)
+		win's setTitlebarAppearsTransparent:true
 		win's setOpaque:false
 		win's setBackgroundColor:clearC
 	else
+		win's setStyleMask:15
+		win's setTitlebarAppearsTransparent:false
 		win's setOpaque:true
 		win's setBackgroundColor:solidC
 	end if
+	win's setFrame:ramka display:true
 	
 	-- WKWebView domyslnie maluje wlasne, kryjace tlo; bez tego szkla nie widac
 	try
@@ -185,16 +195,26 @@ on applyGlass()
 		win's setContentView:webV
 	else
 		win's setContentView:bg
+		-- Strona nie moze byc bezposrednio tresca szkla, bo szklo rozciaga ja
+		-- na cala swoja powierzchnie, razem z pasem pod paskiem tytulu.
+		-- Stad pusta oprawka na cale szklo, a strona w niej tylko w obszarze
+		-- tresci okna (contentLayoutRect, czyli bez paska).
+		set oprawka to current application's NSView's alloc()'s init()
 		-- NSGlassEffectView reczy tylko za contentView: reszta podwidokow
 		-- moze wyladowac nad szklem albo pod nim. NSVisualEffectView
-		-- takiego wejscia nie ma, tam strona idzie zwyklym podwidokiem.
+		-- takiego wejscia nie ma, tam oprawka idzie zwyklym podwidokiem.
 		if (bg's respondsToSelector:"setContentView:") as boolean then
-			bg's setContentView:webV
+			bg's setContentView:oprawka
 		else
-			bg's addSubview:webV
+			oprawka's setFrame:(bg's |bounds|())
+			oprawka's setAutoresizingMask:18
+			bg's addSubview:oprawka
 		end if
-		webV's setFrame:(bg's |bounds|())
+		oprawka's addSubview:webV
+		webV's setFrame:(win's contentLayoutRect())
 	end if
+	-- 18 = rozciaganie w szerz i wzwyz; marginesy stale, wiec pas nad
+	-- strona trzyma wysokosc paska przy kazdej zmianie rozmiaru
 	webV's setAutoresizingMask:18
 	
 	my tellGlass()
@@ -230,16 +250,44 @@ on makeBackdrop()
 	return v
 end makeBackdrop
 
--- strona musi wiedziec, czy ma byc przezroczysta
+-- strona musi wiedziec, czy ma byc przezroczysta i jak mocno zabarwione
+-- jest szklo w systemie
 on tellGlass()
 	if webV is missing value then return
 	set v to "0"
 	if glassMode is not "system" then set v to "1"
+	set t to my glassTint()
 	try
-		webV's evaluateJavaScript:("window.__glass&&window.__glass(" & v & ")") ¬
+		webV's evaluateJavaScript:("window.__glass&&window.__glass(" & v & "," & t & ")") ¬
 			completionHandler:(missing value)
 	end try
 end tellGlass
+
+-- Suwak "Liquid Glass" z Ustawien -> Wyglad (macOS 27). Zapisuje sie jako
+-- liczba zmiennoprzecinkowa 0-1 pod NSGlassTintAmount w ustawieniach
+-- globalnych; 0 to szklo przejrzyste, 1 zabarwione. Oddajemy calkowite
+-- promile od zera do stu, bo AppleScript zamienia ulamek na tekst wedlug
+-- jezyka systemu i przy polskim wyszedlby przecinek, ktorego JavaScript
+-- nie przyjmie.
+on glassTint()
+	try
+		set d to current application's NSUserDefaults's standardUserDefaults()
+		set t to (d's doubleForKey:"NSGlassTintAmount") as real
+	on error
+		return 0
+	end try
+	if t < 0 then set t to 0
+	if t > 1 then set t to 1
+	-- "round" w kontekscie ASOC trafia do mostka ObjC jako selektor, nie do
+	-- AppleScriptu; dzielenie calkowite nie potrzebuje zadnych dodatkow
+	return ((t * 100) + 0.5) div 1
+end glassTint
+
+-- Systemu nie odpytujemy: wartosc odswiezamy, gdy uzytkownik wraca do okna
+-- po zmianie w Ustawieniach.
+on applicationDidBecomeActive:aNotification
+	my tellGlass()
+end applicationDidBecomeActive:
 
 on setGlass:sender
 	try

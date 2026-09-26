@@ -122,8 +122,13 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
    a rozmycie ma co brać z poświaty malowanej przez body::before.
    -------------------------------------------------------------------- */
 :root,html[data-theme="dark"]{
-  --glass:rgba(255,255,255,0.10);--glass-strong:rgba(255,255,255,0.15);
-  --rim:rgba(255,255,255,0.18);--spec:rgba(255,255,255,0.42);
+  /* --tint: suwak Liquid Glass z systemu (macOS 27), 0 przejrzyste,
+     1 zabarwione. Ustawia go aplikacja przez window.__glass;
+     w przeglądarce zostaje 0, czyli tak jak było. */
+  --tint:0;
+  --glass:rgba(255,255,255,calc(0.10 + 0.22 * var(--tint)));
+  --glass-strong:rgba(255,255,255,calc(0.15 + 0.25 * var(--tint)));
+  --rim:rgba(255,255,255,calc(0.18 + 0.14 * var(--tint)));--spec:rgba(255,255,255,0.42);
   --shade:0 1px 2px rgba(0,0,0,0.18);
   --dialface:rgba(43,33,64,0.46);
   --blob-a:rgba(122,69,201,0.45);--blob-b:rgba(56,120,210,0.28);
@@ -136,7 +141,8 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
   /* znaczek listy rozwijanej: podkladka + dwa daszki, jak w macOS 26 */
 }
 html[data-theme="light"]{
-  --glass:rgba(255,255,255,0.52);--glass-strong:rgba(255,255,255,0.64);
+  --glass:rgba(255,255,255,calc(0.52 + 0.30 * var(--tint)));
+  --glass-strong:rgba(255,255,255,calc(0.64 + 0.24 * var(--tint)));
   --rim:rgba(255,255,255,0.85);--spec:rgba(255,255,255,1);
   --shade:0 1px 2px rgba(60,40,100,0.12);
   --dialface:rgba(255,255,255,0.55);
@@ -146,7 +152,8 @@ html[data-theme="light"]{
 }
 @media (prefers-color-scheme:light){
   html[data-theme="auto"]{
-    --glass:rgba(255,255,255,0.52);--glass-strong:rgba(255,255,255,0.64);
+    --glass:rgba(255,255,255,calc(0.52 + 0.30 * var(--tint)));
+    --glass-strong:rgba(255,255,255,calc(0.64 + 0.24 * var(--tint)));
     --rim:rgba(255,255,255,0.85);--spec:rgba(255,255,255,1);
     --shade:0 1px 2px rgba(60,40,100,0.12);
     --dialface:rgba(255,255,255,0.55);
@@ -303,6 +310,11 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
       <div id="tw-state">gotowy</div>
     </div>
   </div>
+
+  <div class="tw-row tw-actions">
+    <button id="tw-reset">Wyzeruj</button>
+    <button id="tw-main">Start</button>
+  </div>
  </div>
 
  <div class="tw-right">
@@ -339,43 +351,44 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
     </div>
   </div>
 
-  <div class="tw-row tw-sound">
+  <div class="tw-group">
+  <div class="tw-item tw-sound">
     <button id="tw-test"><span id="tw-testicon"></span><span id="tw-testlabel">posłuchaj alarmu</span></button>
     <button id="tw-hint" class="tw-icon" title="Wybierz dźwięki alarmu"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11V3M8 3L5 6M8 3l3 3M2.5 10.5v2a1 1 0 001 1h9a1 1 0 001-1v-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
     <button id="tw-default" class="tw-icon" hidden><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 105-5 5 5 0 00-3.9 1.9M3 3v2.5h2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
   </div>
-
-  <div class="tw-row" id="tw-list-row" hidden>
+  <div class="tw-item" id="tw-list-row" hidden>
     <span class="tw-sel"><select id="tw-list"></select></span>
   </div>
-
-  <div class="tw-row">
-    <button id="tw-reset">Wyzeruj</button>
-    <button id="tw-main">Start</button>
   </div>
 
-  <div class="tw-row">
-    <button id="tw-add" class="tw-full">+ zapisz obecny czas</button>
-    <button id="tw-mute" class="tw-full" hidden></button>
+  <div class="tw-group tw-group-presets">
+    <button id="tw-add" class="tw-item">+ zapisz obecny czas</button>
+    <button id="tw-mute" class="tw-item" hidden></button>
+    <div id="tw-presets"></div>
   </div>
 
-  <div class="tw-row">
+  <div class="tw-group">
+  <div class="tw-item">
+    <span class="tw-glyph"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path d="M1.8 8h12.4M8 1.8c-2.2 2.2-2.2 10.2 0 12.4M8 1.8c2.2 2.2 2.2 10.2 0 12.4" fill="none" stroke="currentColor" stroke-width="1.3"></path></svg></span>
     <span class="tw-sel"><select id="tw-lang" aria-label="Język"></select></span>
   </div>
-
-  <div class="tw-row">
-    <span class="tw-sel tw-sel-half"><select id="tw-theme" aria-label="Motyw">
+  <div class="tw-item">
+    <span class="tw-glyph"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path d="M8 1.8a6.2 6.2 0 010 12.4z" fill="currentColor"></path></svg></span>
+    <span class="tw-sel"><select id="tw-theme" aria-label="Motyw">
       <option value="auto">Auto</option>
       <option value="dark">Dark</option>
       <option value="light">Light</option>
     </select></span>
-    <span class="tw-sel tw-sel-half"><select id="tw-font" aria-label="Font">
+  </div>
+  <div class="tw-item">
+    <span class="tw-glyph"><svg width="15" height="14" viewBox="0 0 17 16" aria-hidden="true"><path d="M1.5 13L5.5 3l4 10M3 9.4h5M11 13V9.6a2 2 0 014 0V13M15 11.2h-2.3a1.6 1.6 0 000 3.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+    <span class="tw-sel"><select id="tw-font" aria-label="Font">
       <option value="dys">OpenDyslexic</option>
       <option value="sys">Systemowy</option>
     </select></span>
   </div>
-
-  <div class="tw-row" id="tw-presets"></div>
+  </div>
  </div>
 </div>
 
@@ -878,8 +891,12 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
   window.__native=/ProstyTimerApp/.test(navigator.userAgent);
   window.__nativeMode=function(){window.__native=true};
   // tlo okna rysuje aplikacja (NSGlassEffectView) - strona ma zejsc z drogi
-  window.__glass=function(on){
+  window.__glass=function(on,tint){
     document.documentElement.setAttribute('data-glass',on?'1':'0');
+    // suwak szkla z macOS 27, w setnych calkowitych: 0 przejrzyste, 100 zabarwione
+    if(typeof tint==='number'&&isFinite(tint)){
+      document.documentElement.style.setProperty('--tint',Math.max(0,Math.min(1,tint/100)));
+    }
     if(typeof fitDial==='function')setTimeout(fitDial,0);
   };
   // sygnał dla aplikacji: podmiana tytułu, którą skrypt wykrywa

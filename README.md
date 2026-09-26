@@ -32,11 +32,17 @@ Dwa pozostałe tryby robią jednak z całego okna taflę, bo dla timera parkowan
 na pulpicie to ma sens. Wtedy okno przestaje być kryjące, a `WKWebView` przestaje
 malować własne tło (`drawsBackground` = fałsz) — inaczej zasłoniłby szkło płytą.
 
-Pasek tytułu zostaje zwykłym paskiem tytułu. Wersja z `fullSizeContentView`,
-gdzie szkło szło na wylot pod pasek, wyglądała lepiej i była nie do użycia:
-strona wchodziła pod przyciski okna i przykrywała jedyne miejsce, za które
-okno się łapie — `WKWebView` połyka ruchy myszy, więc okna nie dało się
-przesunąć.
+Szkło idzie na całe okno, także pod pasek tytułu (`fullSizeContentView`),
+ale strona kończy się **pod** paskiem — w pustej oprawce, w obszarze
+`contentLayoutRect`. Pas nad stroną to sama tafla, więc nazwa i przyciski
+okna mają za sobą szkło, a okno da się za ten pas złapać
+(`mouseDownCanMoveWindow`).
+
+Obie prostsze drogi odpadły. Kiedy strona sięgała pod pasek, przykrywała
+jedyne miejsce, za które okno się łapie — `WKWebView` połyka ruchy myszy.
+Kiedy pasek zostawał zwykłym paskiem, w macOS 27 nie malował już tła nad
+niekryjącym oknem i nazwa wisiała na gołym pulpicie. Pusty `NSToolbar` też
+nie pomógł: w Golden Gate taflę dostają dopiero elementy paska.
 
 | Tryb | Co rysuje tło | Menu |
 | --- | --- | --- |
