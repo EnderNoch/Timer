@@ -61,6 +61,30 @@ W przeglądarce rozmycie bierze poświatę malowaną przez `body::before` —
 w oknie aplikacji tej poświaty nie ma, bo pod spodem jest już prawdziwe szkło
 (CSS-owy `backdrop-filter` nie sięga do treści natywnej pod `WKWebView`).
 
+## Układ
+
+Styl to Liquid Glass, a układ idzie za tym, jak macOS 26/27 układa własne
+aplikacje. Wyzeruj i Start stoją pod tarczą jak w Zegarze, a Start jest
+przyciskiem głównym, wypełnionym akcentem. Reszta siedzi w sekcjach jak
+w Ustawieniach systemowych: jedna tafla na sekcję (dźwięk, presety, wygląd),
+w środku wiersze bez własnych ramek, rozdzielone cienką kreską. Wiersze
+wyglądu mają ikony zamiast podpisów, bo podpisy trzeba by tłumaczyć na
+43 języki. W oknie aplikacji strona nie powtarza swojej nazwy — stoi już
+na pasku tytułu.
+
+Układ jest jeden, pionowy — tarcza, pod nią przyciski, niżej sekcje
+sięgające do marginesów. Okno ma granice jak Ustawienia systemowe:
+od 420×750 do 560×1100 i bez pełnego ekranu. Tarcza rośnie z wysokością
+okna, a przy wielu presetach przewija się tylko ich sekcja.
+
+Kolor i ikony idą z systemu. Aplikacja podaje stronie kolor akcentu
+z Ustawień → Wygląd → Kolor (`window.__accent`), a strona liczy z niego
+odcienie motywu; zmiana w Ustawieniach dochodzi od razu, bez przełączania
+okien. Przy „wielokolorowym” akcencie zostaje fiolet timera. Ikony to
+SF Symbols — rysuje je aplikacja i podaje jako PNG (`window.__symbols`),
+a strona używa ich jako maski w kolorze tekstu. W przeglądarce zostają
+rysunki SVG.
+
 ## Jak strona rozmawia z aplikacją
 
 Stan timera jedzie do aplikacji jednym ciągiem znaków z neutralnymi językowo

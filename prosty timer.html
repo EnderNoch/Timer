@@ -58,17 +58,13 @@ html[data-theme="light"]{
 }
 html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center}
 ::selection{background:var(--ring);color:var(--bg)}
-.tw{--g:8px;--full:clamp(272px,26vw,400px);--w:calc((var(--full) - var(--g)) / 2);--h:clamp(38px,4.4vh,54px);--fs:clamp(14px,0.95vw,19px);--dial:clamp(240px,min(58vh,40vw),620px);--digits:calc(var(--dial) * 0.145);display:flex;flex-direction:column;align-items:center;gap:clamp(14px,2.2vh,26px);padding:24px 16px;margin:auto;max-height:100vh;overflow:hidden;color:var(--fg);box-sizing:border-box}
+.tw{--g:8px;--full:clamp(272px,26vw,400px);--w:calc((var(--full) - var(--g)) / 2);--h:clamp(38px,4.4vh,54px);--fs:clamp(14px,0.95vw,19px);--dial:clamp(240px,min(58vh,40vw),620px);--digits:calc(var(--dial) * 0.145);display:flex;flex-direction:column;align-items:center;gap:clamp(14px,2.2vh,26px);padding:20px;margin:auto;max-height:100vh;overflow:hidden;color:var(--fg);box-sizing:border-box}
 .tw-left,.tw-right{display:flex;flex-direction:column;align-items:center;gap:clamp(12px,1.8vh,22px);min-height:0}
 .tw-dial{position:relative;width:var(--dial);height:var(--dial);flex:0 0 auto}
 .tw-dial svg{width:var(--dial);height:var(--dial);transform:rotate(-90deg)}
 .tw-dial-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--digits) * 0.12)}
 #tw-time{font-size:var(--digits);font-weight:500;font-variant-numeric:tabular-nums;color:var(--fg);line-height:1.1}
 #tw-state{font-size:calc(var(--digits) * 0.32);color:var(--muted)}
-@media (min-width:820px) and (min-height:430px){
-  .tw{flex-direction:row;align-items:center;gap:clamp(36px,7vw,140px)}
-  .tw-right{max-height:calc(100vh - 48px)}
-}
 .tw input,.tw button,.tw select{font-family:inherit}
 .tw button,.tw-field,.tw select{box-sizing:border-box;height:var(--h);width:var(--w);padding:0 12px;border:1px solid var(--line);border-radius:8px;background-color:transparent;color:var(--fg);font-size:var(--fs);display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:background 0.12s,border-color 0.12s;overflow:hidden;white-space:nowrap}
 .tw button:hover,.tw-field:hover,.tw select:hover{background-color:var(--hover);border-color:var(--hoverline)}
@@ -77,7 +73,6 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
 .tw-row{display:flex;gap:var(--g);flex-wrap:wrap;justify-content:center;align-items:center;width:var(--full)}
 .tw button.tw-full{width:var(--full)}
 .tw select{width:var(--full);font-size:var(--fs);text-align:center;text-align-last:center}
-.tw select#tw-theme,.tw select#tw-font{width:var(--w)}
 .tw select option{background:var(--bg);color:var(--fg)}
 .tw button.tw-icon{width:var(--h);padding:0;flex:0 0 auto}
 #tw-test{min-width:0}
@@ -135,7 +130,7 @@ html,body{background:var(--bg);color:var(--fg);margin:0;padding:0;height:100vh;o
   --legible:0 1px 14px rgba(0,0,0,0.45);
   --blur:22px;
   /* znaczek listy rozwijanej: podkladka + dwa daszki, jak w macOS 26 */
-  --chev:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Crect width='22' height='22' rx='6' fill='%23ffffff' fill-opacity='.16'/%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.9' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.6 9.3 11 6l3.4 3.3'/%3E%3Cpath d='M7.6 12.7 11 16l3.4-3.3'/%3E%3C/g%3E%3C/svg%3E");
+  --chev:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Crect width='22' height='22' rx='11' fill='%23ffffff' fill-opacity='.16'/%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.9' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.6 9.3 11 6l3.4 3.3'/%3E%3Cpath d='M7.6 12.7 11 16l3.4-3.3'/%3E%3C/g%3E%3C/svg%3E");
   /* promien kontrolek: 999px to kapsula, ~10px to zaokraglony prostokat */
   --r:999px;
   /* znaczek listy rozwijanej: podkladka + dwa daszki, jak w macOS 26 */
@@ -148,7 +143,7 @@ html[data-theme="light"]{
   --dialface:rgba(255,255,255,0.55);
   --blob-a:rgba(140,110,230,0.30);--blob-b:rgba(120,180,235,0.26);
   --legible:0 1px 12px rgba(255,255,255,0.75);
-  --chev:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Crect width='22' height='22' rx='6' fill='%231B1526' fill-opacity='.12'/%3E%3Cg fill='none' stroke='%231B1526' stroke-opacity='.85' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.6 9.3 11 6l3.4 3.3'/%3E%3Cpath d='M7.6 12.7 11 16l3.4-3.3'/%3E%3C/g%3E%3C/svg%3E");
+  --chev:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Crect width='22' height='22' rx='11' fill='%231B1526' fill-opacity='.12'/%3E%3Cg fill='none' stroke='%231B1526' stroke-opacity='.85' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.6 9.3 11 6l3.4 3.3'/%3E%3Cpath d='M7.6 12.7 11 16l3.4-3.3'/%3E%3C/g%3E%3C/svg%3E");
 }
 @media (prefers-color-scheme:light){
   html[data-theme="auto"]{
@@ -159,7 +154,7 @@ html[data-theme="light"]{
     --dialface:rgba(255,255,255,0.55);
     --blob-a:rgba(140,110,230,0.30);--blob-b:rgba(120,180,235,0.26);
     --legible:0 1px 12px rgba(255,255,255,0.75);
-  --chev:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Crect width='22' height='22' rx='6' fill='%231B1526' fill-opacity='.12'/%3E%3Cg fill='none' stroke='%231B1526' stroke-opacity='.85' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.6 9.3 11 6l3.4 3.3'/%3E%3Cpath d='M7.6 12.7 11 16l3.4-3.3'/%3E%3C/g%3E%3C/svg%3E");
+  --chev:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 22 22'%3E%3Crect width='22' height='22' rx='11' fill='%231B1526' fill-opacity='.12'/%3E%3Cg fill='none' stroke='%231B1526' stroke-opacity='.85' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.6 9.3 11 6l3.4 3.3'/%3E%3Cpath d='M7.6 12.7 11 16l3.4-3.3'/%3E%3C/g%3E%3C/svg%3E");
   }
 }
 
@@ -266,12 +261,7 @@ body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none
    „OpenDyslexic” potrzebuje 171 px, a dostawał 132. Teraz bierze tyle,
    ile okno daje — nadal nie więcej niż 400 px. Odjęte 48 px to boczne
    dopełnienie .tw plus zapas na pasek przewijania listy presetów. */
-.tw{--full:clamp(272px,calc(100vw - 48px),400px);overflow-x:hidden;overflow-y:auto}
-
-/* Odstęp między tarczą a kontrolkami: 7vw dawało 118 px na szerokim ekranie */
-@media (min-width:820px) and (min-height:430px){
-  .tw{gap:clamp(28px,4vw,72px)}
-}
+.tw{--full:clamp(272px,calc(100vw - 40px),400px);overflow-x:hidden;overflow-y:auto}
 
 /* tarcza: szklany krążek pod pierścieniem */
 .tw-dial svg{position:relative;z-index:1}
@@ -291,6 +281,113 @@ html[data-glass="1"],html[data-glass="1"] body{background:transparent}
 html[data-glass="1"] body::before{display:none}
 html[data-glass="1"] #tw-time,html[data-glass="1"] #tw-state,
 html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
+</style>
+<style>
+/* ---------- Układ jak w macOS 26/27 ----------------------------------
+   Zamiast słupka osobnych kapsuł: Wyzeruj i Start pod tarczą (jak w Zegarze),
+   a reszta w sekcjach jak w Ustawieniach systemowych. Jedna tafla na sekcję,
+   w środku wiersze bez własnych ramek, rozdzielone cienką kreską. Ikony
+   zamiast podpisów wierszy, bo podpisy trzeba by tłumaczyć na 43 języki.
+   -------------------------------------------------------------------- */
+:root,html[data-theme="dark"]{--sep:rgba(255,255,255,0.12)}
+html[data-theme="light"]{--sep:rgba(60,40,100,0.12)}
+@media (prefers-color-scheme:light){html[data-theme="auto"]{--sep:rgba(60,40,100,0.12)}}
+
+/* w oknie aplikacji nazwa stoi na pasku tytułu */
+html[data-native="1"] .tw-title{display:none}
+
+/* akcje pod tarczą; Start to przycisk główny, wypełniony akcentem */
+.tw-actions{flex-wrap:nowrap}
+.tw .tw-actions button{flex:1 1 0;width:auto;min-width:0}
+#tw-main{background-color:var(--ring);color:var(--ontint,#fff);font-weight:600}
+#tw-main:hover{background-color:var(--ring);filter:brightness(1.08)}
+#tw-main:active{background-color:var(--ring);filter:brightness(0.92)}
+
+/* sekcja: jedna tafla */
+.tw-group{width:var(--full);box-sizing:border-box;flex:0 0 auto;min-height:0;
+  display:flex;flex-direction:column;border-radius:12px;overflow:hidden;
+  background-color:var(--glass);
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(180%);
+  backdrop-filter:blur(var(--blur)) saturate(180%);
+  box-shadow:inset 0 1px 0 var(--spec),inset 0 0 0 1px var(--rim),var(--shade)}
+
+/* wiersz */
+.tw .tw-group .tw-item{position:relative;display:flex;align-items:center;flex:0 0 auto;
+  box-sizing:border-box;width:100%;height:var(--h);margin:0;padding:0}
+.tw .tw-group .tw-item[hidden]{display:none}
+/* kreska nad każdym widocznym wierszem, który ma nad sobą inny wiersz */
+.tw-group .tw-item:not([hidden]) ~ .tw-item::before,
+#tw-presets .tw-pre::before{content:"";position:absolute;top:0;left:14px;right:0;
+  height:1px;background:var(--sep);pointer-events:none}
+
+/* przyciski-wiersze: bez własnej tafli, tekst od lewej */
+.tw .tw-group button.tw-item,
+.tw .tw-group .tw-item > button:not(.tw-icon),
+.tw #tw-presets button.tw-pre{
+  width:100%;height:var(--h);border-radius:0;justify-content:flex-start;
+  padding:0 14px;gap:12px;background:transparent;box-shadow:none;outline:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none;transform:none}
+.tw .tw-group button.tw-item:hover,
+.tw .tw-group .tw-item > button:not(.tw-icon):hover,
+.tw #tw-presets button.tw-pre:hover{background:var(--hover);box-shadow:none}
+.tw .tw-group button.tw-item:active,
+.tw .tw-group .tw-item > button:not(.tw-icon):active,
+.tw #tw-presets button.tw-pre:active{background:var(--active);transform:none}
+.tw .tw-group button.tw-item:focus-visible,
+.tw .tw-group .tw-item > button:not(.tw-icon):focus-visible,
+.tw #tw-presets button.tw-pre:focus-visible{box-shadow:inset 0 0 0 2px var(--focusline)}
+#tw-testicon{width:18px}
+#tw-add.tw-item{outline:none;background:transparent;color:var(--icon)}
+#tw-add.tw-item:hover{background:var(--hover)}
+
+/* małe przyciski z ikoną na końcu wiersza dźwięku */
+.tw .tw-group .tw-icon{width:calc(var(--h) - 10px);height:calc(var(--h) - 10px);
+  margin-right:5px;color:var(--icon);background:transparent;box-shadow:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none}
+.tw .tw-group .tw-icon:hover{background:var(--hover);box-shadow:none}
+
+/* listy w wierszu: bez tafli, podświetla się cały wiersz. Lista zaczyna się
+   17 px od lewej, żeby jej napis (13 px przesunięcia + 14 px dopełnienia)
+   stanął w tej samej kolumnie co napis „posłuchaj alarmu” - 44 px. */
+.tw .tw-group .tw-sel{flex:1 1 auto;width:auto;min-width:0;margin-left:17px;
+  border-radius:0;background-color:transparent;box-shadow:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none}
+.tw .tw-group .tw-sel:hover{background-color:transparent;box-shadow:none}
+.tw-group .tw-item:has(.tw-sel):hover{background-color:var(--hover)}
+.tw-glyph{position:absolute;left:14px;top:0;bottom:0;width:18px;z-index:1;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--icon);pointer-events:none}
+
+/* Narożniki jak w macOS 27 (Golden Gate), zmierzone na kontrolkach AppKit:
+   zwykła kontrolka (24 pt) to już nie kapsuła, tylko zaokrąglony prostokąt
+   z promieniem ~1/4 wysokości (6 pt); sekcja formularza 12 pt; znaczek
+   listy rozwijanej w kółku. Kapsuły zostały przy dużych kontrolkach systemu,
+   a tu pola i przyciski odpowiadają zwykłym - tylko większym, bo większy
+   jest tekst. Liczone na .tw, bo tam jest --h. */
+.tw{--r:calc(var(--h) * 0.25)}
+/* małe przyciski z samą ikoną zostają okrągłe, jak w systemie */
+.tw .tw-group .tw-icon{border-radius:50%}
+
+/* ikona SF Symbols od aplikacji: maska w kolorze tekstu (currentColor) */
+.sf{display:block;flex:0 0 auto;background-color:currentColor;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-position:center;mask-position:center;
+  -webkit-mask-size:contain;mask-size:contain}
+
+/* presety jako wiersze listy */
+#tw-presets{display:block;width:100%;min-height:0;flex:0 1 auto;
+  overflow-y:auto;overflow-x:hidden;scrollbar-gutter:auto}
+.tw #tw-presets button.tw-pre{position:relative;display:flex;justify-content:space-between;padding:0 9px 0 14px}
+#tw-presets .tw-pre span:first-child{text-align:start;font-variant-numeric:tabular-nums}
+
+/* Jeden układ, pionowy: tarcza, pod nią przyciski, niżej sekcje - jak
+   okno Ustawień systemowych, które też nie ma wersji poziomej. Sekcje
+   sięgają do marginesów (2 x 20 px). Nic się nie kurczy; presety pokazują
+   najwyżej dwa wiersze i dalej przewijają się w sekcji, więc układ ma stałą
+   wysokość, której pilnuje aplikacja (najmniejsza wysokość okna). */
+.tw{--full:clamp(272px,calc(100vw - 40px),680px)}
+.tw-right{flex:0 0 auto}
+#tw-presets{max-height:calc(var(--h) * 2)}
 </style>
 </head>
 <body>
@@ -323,8 +420,8 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
       <div class="tw-field tw-third">
         <input id="tw-h" type="number" min="0" max="99" value="0" inputmode="numeric">
         <span class="tw-spin">
-          <button type="button" data-t="tw-h" data-d="1" aria-label="więcej godzin"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 5.5L5 1.5L9 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-          <button type="button" data-t="tw-h" data-d="-1" aria-label="mniej godzin"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 1.5L5 5.5L9 1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+          <button type="button" data-t="tw-h" data-d="1" data-sf="chevron.up" data-w="11" data-h="7" aria-label="więcej godzin"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 5.5L5 1.5L9 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+          <button type="button" data-t="tw-h" data-d="-1" data-sf="chevron.down" data-w="11" data-h="7" aria-label="mniej godzin"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 1.5L5 5.5L9 1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
         </span>
       </div>
       <div class="tw-lab" id="tw-lab-h">godz</div>
@@ -333,8 +430,8 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
       <div class="tw-field tw-third">
         <input id="tw-m" type="number" min="0" max="59" value="5" inputmode="numeric">
         <span class="tw-spin">
-          <button type="button" data-t="tw-m" data-d="1" aria-label="więcej minut"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 5.5L5 1.5L9 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-          <button type="button" data-t="tw-m" data-d="-1" aria-label="mniej minut"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 1.5L5 5.5L9 1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+          <button type="button" data-t="tw-m" data-d="1" data-sf="chevron.up" data-w="11" data-h="7" aria-label="więcej minut"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 5.5L5 1.5L9 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+          <button type="button" data-t="tw-m" data-d="-1" data-sf="chevron.down" data-w="11" data-h="7" aria-label="mniej minut"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 1.5L5 5.5L9 1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
         </span>
       </div>
       <div class="tw-lab" id="tw-lab-m">min</div>
@@ -343,8 +440,8 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
       <div class="tw-field tw-third">
         <input id="tw-s" type="number" min="0" max="59" value="0" inputmode="numeric">
         <span class="tw-spin">
-          <button type="button" data-t="tw-s" data-d="1" aria-label="więcej sekund"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 5.5L5 1.5L9 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-          <button type="button" data-t="tw-s" data-d="-1" aria-label="mniej sekund"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 1.5L5 5.5L9 1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+          <button type="button" data-t="tw-s" data-d="1" data-sf="chevron.up" data-w="11" data-h="7" aria-label="więcej sekund"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 5.5L5 1.5L9 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+          <button type="button" data-t="tw-s" data-d="-1" data-sf="chevron.down" data-w="11" data-h="7" aria-label="mniej sekund"><svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 1.5L5 5.5L9 1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
         </span>
       </div>
       <div class="tw-lab" id="tw-lab-s">sek</div>
@@ -354,10 +451,11 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
   <div class="tw-group">
   <div class="tw-item tw-sound">
     <button id="tw-test"><span id="tw-testicon"></span><span id="tw-testlabel">posłuchaj alarmu</span></button>
-    <button id="tw-hint" class="tw-icon" title="Wybierz dźwięki alarmu"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11V3M8 3L5 6M8 3l3 3M2.5 10.5v2a1 1 0 001 1h9a1 1 0 001-1v-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-    <button id="tw-default" class="tw-icon" hidden><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 105-5 5 5 0 00-3.9 1.9M3 3v2.5h2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <button id="tw-hint" class="tw-icon" data-sf="square.and.arrow.up" data-w="14" data-h="17" title="Wybierz dźwięki alarmu"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11V3M8 3L5 6M8 3l3 3M2.5 10.5v2a1 1 0 001 1h9a1 1 0 001-1v-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+    <button id="tw-default" class="tw-icon" data-sf="arrow.counterclockwise" data-w="14" data-h="16" hidden><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 105-5 5 5 0 00-3.9 1.9M3 3v2.5h2.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
   </div>
   <div class="tw-item" id="tw-list-row" hidden>
+    <span class="tw-glyph" data-sf="music.note" data-w="12" data-h="16"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 12.2V3.4l7-1.6v8.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path><ellipse cx="4.3" cy="12.4" rx="2.1" ry="1.7" fill="currentColor"></ellipse><ellipse cx="11.3" cy="10.6" rx="2.1" ry="1.7" fill="currentColor"></ellipse></svg></span>
     <span class="tw-sel"><select id="tw-list"></select></span>
   </div>
   </div>
@@ -370,11 +468,11 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
 
   <div class="tw-group">
   <div class="tw-item">
-    <span class="tw-glyph"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path d="M1.8 8h12.4M8 1.8c-2.2 2.2-2.2 10.2 0 12.4M8 1.8c2.2 2.2 2.2 10.2 0 12.4" fill="none" stroke="currentColor" stroke-width="1.3"></path></svg></span>
+    <span class="tw-glyph" data-sf="globe" data-w="16" data-h="16"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path d="M1.8 8h12.4M8 1.8c-2.2 2.2-2.2 10.2 0 12.4M8 1.8c2.2 2.2 2.2 10.2 0 12.4" fill="none" stroke="currentColor" stroke-width="1.3"></path></svg></span>
     <span class="tw-sel"><select id="tw-lang" aria-label="Język"></select></span>
   </div>
   <div class="tw-item">
-    <span class="tw-glyph"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path d="M8 1.8a6.2 6.2 0 010 12.4z" fill="currentColor"></path></svg></span>
+    <span class="tw-glyph" data-sf="circle.lefthalf.filled" data-w="16" data-h="16"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path d="M8 1.8a6.2 6.2 0 010 12.4z" fill="currentColor"></path></svg></span>
     <span class="tw-sel"><select id="tw-theme" aria-label="Motyw">
       <option value="auto">Auto</option>
       <option value="dark">Dark</option>
@@ -382,7 +480,7 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
     </select></span>
   </div>
   <div class="tw-item">
-    <span class="tw-glyph"><svg width="15" height="14" viewBox="0 0 17 16" aria-hidden="true"><path d="M1.5 13L5.5 3l4 10M3 9.4h5M11 13V9.6a2 2 0 014 0V13M15 11.2h-2.3a1.6 1.6 0 000 3.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+    <span class="tw-glyph" data-sf="textformat" data-w="20" data-h="14"><svg width="15" height="14" viewBox="0 0 17 16" aria-hidden="true"><path d="M1.5 13L5.5 3l4 10M3 9.4h5M11 13V9.6a2 2 0 014 0V13M15 11.2h-2.3a1.6 1.6 0 000 3.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
     <span class="tw-sel"><select id="tw-font" aria-label="Font">
       <option value="dys">OpenDyslexic</option>
       <option value="sys">Systemowy</option>
@@ -416,7 +514,25 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
   var PLAY='<svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><polygon points="3,2 12,7 3,12" fill="currentColor"></polygon></svg>';
   var STOP='<svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1.5" fill="currentColor"></rect></svg>';
   var MUTE='<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M7.5 3.2L4.8 5.4H2.6v5.2h2.2l2.7 2.2V3.2z" fill="currentColor"></path><path d="M10.4 6.2l3.2 3.6M13.6 6.2l-3.2 3.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"></path></svg>';
-  tIcon.innerHTML=PLAY;
+  // SF Symbols: rysuje je aplikacja (NSImage systemSymbolName) i podaje
+  // jako PNG przez window.__symbols. W przeglądarce zostają rysunki SVG.
+  var SF=null;
+  function sf(n,w,h,fb){
+    if(!SF||!SF[n])return fb;
+    return '<i class="sf" aria-hidden="true" style="width:'+w+'px;height:'+h+'px;-webkit-mask-image:url('+SF[n]+');mask-image:url('+SF[n]+')"></i>';
+  }
+  function iPlay(){return sf('play.fill',12,14,PLAY)}
+  function iStop(){return sf('stop.fill',12,11,STOP)}
+  function iMute(){return sf('speaker.slash.fill',14,16,MUTE)}
+  function iUnmute(){return sf('speaker.wave.2.fill',18,14,PLAY)}
+  function setAdd(){
+    var b=$('tw-add');
+    if(SF&&SF.plus){
+      b.innerHTML=sf('plus',12,11,'')+'<span></span>';
+      b.lastChild.textContent=T.save.replace(/^\+\s*/,'');
+    }else b.textContent=T.save;
+  }
+  tIcon.innerHTML=iPlay();
 
   var links=[],cv=document.createElement('canvas'),lastIcon='';
   cv.width=64;cv.height=64;
@@ -465,15 +581,10 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
       b.className='tw-pre';b.dataset.sec=sec;
       var t=document.createElement('span');t.textContent=label(sec);
       var x=document.createElement('span');x.className='x';x.title='usu\u0144';
-      x.innerHTML='<svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 3.5L10.5 10.5M10.5 3.5L3.5 10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>';
+      x.innerHTML=sf('xmark',11,10,'<svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 3.5L10.5 10.5M10.5 3.5L3.5 10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>');
       b.appendChild(t);b.appendChild(x);
       pbox.appendChild(b);
     });
-    if(presets.length%2===1){
-      var ghost=document.createElement('div');
-      ghost.className='tw-ghost';
-      pbox.appendChild(ghost);
-    }
     if(typeof fitDial==='function')setTimeout(fitDial,0);
   }
 
@@ -482,9 +593,50 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
     $('tw-font').value=fontPref;
     if(typeof fitDial==='function')setTimeout(fitDial,0);
   }
+  // Kolor akcentu z Ustawień systemowych (Wygląd -> Kolor). Podaje go
+  // aplikacja przez window.__accent; z niego liczą się wszystkie odcienie
+  // motywu, osobno dla ciemnego i jasnego. Bez akcentu (przeglądarka albo
+  // "wielokolorowy" w systemie) zostaje fiolet ze stylów.
+  var ACC=null;
+  var ACCKEYS=['--ring','--ringpause','--hover','--active','--focus','--focusline','--hoverline','--face','--icon','--title','--glow','--dialface','--blob-a','--ontint'];
+  function mix(a,b,t){return [0,1,2].map(function(i){return Math.round(a[i]+(b[i]-a[i])*t)})}
+  function rgb(c,al){return al==null?'rgb('+c.join(',')+')':'rgba('+c.join(',')+','+al+')'}
+  function isDark(){
+    if(themePref!=='auto')return themePref==='dark';
+    return !(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches);
+  }
+  function applyAccent(){
+    var st=document.documentElement.style,v={};
+    if(ACC){
+      var A=ACC,W=[255,255,255],K=[0,0,0],BG=[26,26,25],ring;
+      if(isDark()){
+        ring=mix(A,W,0.25);
+        v['--ringpause']=rgb(mix(A,K,0.2));
+        v['--hover']=rgb(A,0.35);v['--active']=rgb(A,0.55);
+        v['--focus']=rgb(mix(A,W,0.35),0.55);v['--focusline']=rgb(mix(A,W,0.45));
+        v['--hoverline']=rgb(mix(A,W,0.3));v['--face']=rgb(mix(A,BG,0.8));
+        v['--icon']=rgb(mix(A,W,0.55));v['--title']=rgb(mix(A,W,0.8));
+        v['--glow']=rgb(ring,0.55);v['--dialface']=rgb(mix(A,BG,0.75),0.46);
+        v['--blob-a']=rgb(A,0.45);
+      }else{
+        ring=mix(A,K,0.12);
+        v['--ringpause']=rgb(mix(A,W,0.35));
+        v['--hover']=rgb(A,0.14);v['--active']=rgb(A,0.24);
+        v['--focus']=rgb(A,0.45);v['--focusline']=rgb(mix(A,K,0.1));
+        v['--hoverline']=rgb(mix(A,W,0.2));v['--face']=rgb(mix(A,W,0.85));
+        v['--icon']=rgb(mix(A,K,0.1));v['--title']=rgb(mix(A,K,0.5));
+        v['--glow']=rgb(A,0.25);v['--blob-a']=rgb(mix(A,W,0.2),0.3);
+      }
+      v['--ring']=rgb(ring);
+      // napis na wypełnionym przycisku Start: ciemny na jasnym akcencie (żółty)
+      v['--ontint']=(0.2126*ring[0]+0.7152*ring[1]+0.0722*ring[2])/255>0.62?'#1B1526':'#fff';
+    }
+    ACCKEYS.forEach(function(k){if(v[k])st.setProperty(k,v[k]);else st.removeProperty(k)});
+  }
   function applyTheme(){
     document.documentElement.setAttribute('data-theme',themePref);
     $('tw-theme').value=themePref;
+    applyAccent();
     readColors();lastIcon='';
   }
   function paintMute(){
@@ -498,7 +650,7 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
       mb.innerHTML='';
       var ic=document.createElement('span');
       ic.style.cssText='display:flex;align-items:center;justify-content:center;width:15px;height:15px;flex:0 0 auto';
-      ic.innerHTML=muted?PLAY:MUTE;
+      ic.innerHTML=muted?iUnmute():iMute();
       var tx=document.createElement('span');
       tx.textContent=muted?T.muteOff:T.muteOn;
       mb.appendChild(ic);mb.appendChild(tx);
@@ -595,7 +747,7 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
     $('tw-lab-h').textContent=T.h;
     $('tw-lab-m').textContent=T.m;
     $('tw-lab-s').textContent=T.s;
-    $('tw-add').textContent=T.save;
+    setAdd();
     $('tw-reset').textContent=T.reset;
     if(mode==='idle'){main.textContent=T.start}
     else if(mode==='running'){main.textContent=T.pauseBtn}
@@ -690,7 +842,7 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
     testing=false;
     if(testTimer){clearTimeout(testTimer);testTimer=null}
     idleAudio();
-    tIcon.innerHTML=PLAY;tLabel.textContent=T.listen;
+    tIcon.innerHTML=iPlay();tLabel.textContent=T.listen;
   }
   function stopBeeps(){if(beepTimer){clearInterval(beepTimer);beepTimer=null}}
   function idleAudio(){
@@ -769,7 +921,7 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
         return}
       var sel=$('tw-list'),si=(sel&&!$('tw-list-row').hidden)?sel.selectedIndex:-1;
       pickPending=true;chan('__PLAY__ |T'+Date.now()+' |S'+si);
-      testing=true;tIcon.innerHTML=STOP;tLabel.textContent=T.stopSnd;
+      testing=true;tIcon.innerHTML=iStop();tLabel.textContent=T.stopSnd;
       setTimeout(function(){
         pickPending=false;
         paint(mode==='idle'?total*1000:(endAt-Date.now()));
@@ -778,7 +930,7 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
     }
     if(testing){silence();endTest();return}
     ctx();alarm();testing=true;
-    tIcon.innerHTML=STOP;tLabel.textContent=T.stopSnd;
+    tIcon.innerHTML=iStop();tLabel.textContent=T.stopSnd;
     testTimer=setTimeout(endTest,alarmLen());
   });
   setup.addEventListener('click',function(e){
@@ -845,15 +997,12 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
   }
   function fitDial(){
     var root=document.querySelector('.tw'),right=document.querySelector('.tw-right'),left=document.querySelector('.tw-left');
-    if(window.matchMedia('(min-width:820px) and (min-height:560px)').matches){
-      var titleH=document.querySelector('.tw-title').offsetHeight;
-      var gap=parseFloat(getComputedStyle(left).rowGap)||16;
-      var target=right.offsetHeight-titleH-gap;
-      var max=Math.min(window.innerHeight-120,window.innerWidth*0.42,560);
-      root.style.setProperty('--dial',Math.max(240,Math.min(target,max))+'px');
-    }else{
-      root.style.removeProperty('--dial');
-    }
+    // tarcza nad kontrolkami bierze wysokość, która zostaje po nich, ale nie
+    // mniej niż 200 px i nie szerzej niż kolumna
+    var dialH=document.querySelector('.tw-dial').offsetHeight;
+    var other=left.offsetHeight-dialH+right.offsetHeight+(parseFloat(getComputedStyle(root).rowGap)||14);
+    var fit=Math.min(window.innerHeight-40-other,window.innerWidth-40,600);
+    root.style.setProperty('--dial',Math.max(200,fit)+'px');
   }
   window.addEventListener('resize',fitDial);
 
@@ -889,7 +1038,9 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
     }catch(e){}
   }
   window.__native=/ProstyTimerApp/.test(navigator.userAgent);
-  window.__nativeMode=function(){window.__native=true};
+  // w oknie aplikacji nazwa stoi już na pasku tytułu - strona jej nie powtarza
+  if(window.__native)document.documentElement.setAttribute('data-native','1');
+  window.__nativeMode=function(){window.__native=true;document.documentElement.setAttribute('data-native','1');if(typeof fitDial==='function')setTimeout(fitDial,0)};
   // tlo okna rysuje aplikacja (NSGlassEffectView) - strona ma zejsc z drogi
   window.__glass=function(on,tint){
     document.documentElement.setAttribute('data-glass',on?'1':'0');
@@ -898,6 +1049,19 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
       document.documentElement.style.setProperty('--tint',Math.max(0,Math.min(1,tint/100)));
     }
     if(typeof fitDial==='function')setTimeout(fitDial,0);
+  };
+  window.__accent=function(r,g,b){
+    ACC=(typeof r==='number'&&isFinite(r))?[r,g,b]:null;
+    applyTheme();paint(mode==='idle'?total*1000:(endAt-Date.now()));
+  };
+  window.__symbols=function(m){
+    SF=m||null;
+    document.querySelectorAll('[data-sf]').forEach(function(el){
+      if(el._fb==null)el._fb=el.innerHTML;
+      el.innerHTML=sf(el.getAttribute('data-sf'),+el.getAttribute('data-w')||16,+el.getAttribute('data-h')||16,el._fb);
+    });
+    tIcon.innerHTML=testing?iStop():iPlay();
+    setAdd();paintMute();drawPresets();
   };
   // sygnał dla aplikacji: podmiana tytułu, którą skrypt wykrywa
   window.__askFiles=function(){
@@ -950,6 +1114,16 @@ html[data-glass="1"] .tw-lab{text-shadow:var(--legible)}
     }catch(e){}
   };
   // wykrycie aplikacji: WKWebView nie ma "Safari" w identyfikatorze
+  // Aplikacja podaje stan (szkło, akcent, ikony, dźwięki) raz na załadowanie
+  // strony. Ten sygnał mówi jej, że strona wystartowała od nowa - także
+  // wtedy, gdy przeładował ją sam WebKit, a nie menu aplikacji.
+  if(window.__native)chan('__READY__');
+  // W aplikacji nie ma menu WebKitu pod prawym przyciskiem (Przeładuj,
+  // Wstecz...) - zwykła aplikacja macOS go nie ma. Zostaje w polach tekstowych,
+  // bo tam jest Wytnij / Kopiuj / Wklej.
+  if(window.__native)document.addEventListener('contextmenu',function(e){
+    if(!(e.target&&e.target.closest&&e.target.closest('input')))e.preventDefault();
+  });
   load();applyTheme();applyFont();buildLangList();applyLang();setInputs(total);paint(total*1000);
   loadStored();markCustom();
   // lista dźwięków wraca z aplikacji (window.__loadAlarms), jeśli plik zapisu istnieje

@@ -21,6 +21,13 @@ property soundPaths : {}
 -- "liquid" NSGlassEffectView na cale okno, "frost" NSVisualEffectView
 property glassMode : "liquid"
 property glassItems : {}
+-- granice okna (patrz buildWindow). Musza stac nad kazdym handlerem, ktory
+-- ich uzywa - AppleScript czyta nazwy po kolei i wlasciwosc zadeklarowana
+-- nizej bralby za niezdefiniowana zmienna lokalna.
+property minW : 420
+property minH : 750
+property maxW : 560
+property maxH : 1100
 
 -- sciezki i ustawienia
 property supportDir : ""
@@ -45,6 +52,7 @@ on run
 	end if
 	
 	my buildWindow()
+	my watchColors()
 	my buildStatusItem()
 	my buildMenu()
 end run
@@ -93,7 +101,7 @@ on buildWindow()
 	set theURL to current application's NSURL's fileURLWithPath:htmlPath
 	set theDir to current application's NSURL's fileURLWithPath:htmlDir
 	
-	set frameRect to current application's NSMakeRect(0, 0, 1100, 720)
+	set frameRect to current application's NSMakeRect(0, 0, 460, 820)
 	
 	-- 1 pasek tytulu + 2 zamykanie + 4 minimalizacja + 8 zmiana rozmiaru
 	set styleMask to 15
@@ -102,8 +110,32 @@ on buildWindow()
 		initWithContentRect:frameRect styleMask:styleMask backing:2 defer:false
 	
 	win's setTitle:"Prosty timer"
-	win's setMinSize:(current application's NSMakeSize(420, 560))
+	-- Jeden, pionowy uklad strony i granice jak w Ustawieniach systemowych:
+	-- okno nie rozciaga sie na caly ekran. 750 px to najmniejsza tarcza
+	-- (200 px) z kontrolkami pod nia plus pasek tytulu; przy 560 x 1100
+	-- tarcza dochodzi do ~520 px, a sekcje maja rozsadna szerokosc.
+	win's setMinSize:(current application's NSMakeSize(minW, minH))
+	win's setMaxSize:(current application's NSMakeSize(maxW, maxH))
+	-- bez pelnego ekranu (NSWindowCollectionBehaviorFullScreenNone = 512);
+	-- zielony przycisk tylko powieksza okno do maksimum
+	win's setCollectionBehavior:512
 	win's setFrameAutosaveName:"ProstyTimerOkno"
+	-- zapamietana ramka mogla powstac przy starych granicach (np. 1100 px
+	-- szerokosci w ukladzie poziomym)
+	set r to my rectSize(win's frame())
+	set dobry to my fitSize(item 1 of r, item 2 of r)
+	if dobry is not r then
+		set f to win's frame()
+		try
+			set ox to item 1 of item 1 of f
+			set oy to item 2 of item 1 of f
+		on error
+			set ox to x of origin of f
+			set oy to y of origin of f
+		end try
+		-- gorna krawedz zostaje na miejscu
+		win's setFrame:(current application's NSMakeRect(ox, oy - ((item 2 of dobry) - (item 2 of r)), item 1 of dobry, item 2 of dobry)) display:false
+	end if
 	win's setReleasedWhenClosed:false
 	win's |center|()
 	
@@ -199,19 +231,28 @@ on applyGlass()
 		-- na cala swoja powierzchnie, razem z pasem pod paskiem tytulu.
 		-- Stad pusta oprawka na cale szklo, a strona w niej tylko w obszarze
 		-- tresci okna (contentLayoutRect, czyli bez paska).
-		set oprawka to current application's NSView's alloc()'s init()
+		-- Oprawka od razu na wymiar szkla. Z init() startowala 0x0 i szklo
+		-- rozciagalo ja dopiero przy ukladaniu - czyli PO wpieciu strony, ktora
+		-- (maska 18) rosla razem z nia o caly rozmiar okna: strona 2x wieksza
+		-- niz okno, tresc wyjechana w prawy dolny rog.
+		set oprawka to current application's NSView's alloc()'s initWithFrame:(bg's |bounds|())
+		oprawka's setAutoresizingMask:18
 		-- NSGlassEffectView reczy tylko za contentView: reszta podwidokow
 		-- moze wyladowac nad szklem albo pod nim. NSVisualEffectView
 		-- takiego wejscia nie ma, tam oprawka idzie zwyklym podwidokiem.
 		if (bg's respondsToSelector:"setContentView:") as boolean then
 			bg's setContentView:oprawka
 		else
-			oprawka's setFrame:(bg's |bounds|())
-			oprawka's setAutoresizingMask:18
 			bg's addSubview:oprawka
 		end if
 		oprawka's addSubview:webV
-		webV's setFrame:(win's contentLayoutRect())
+		-- Ramka strony liczona z oprawki: cala szerokosc, wysokosc bez paska.
+		-- contentLayoutRect odpada - zanim okno stanie na ekranie, podaje
+		-- nieaktualne y (np. -637) i strona ladowala pod oknem.
+		set wh to my rectSize(oprawka's |bounds|())
+		set pasek to (item 2 of my rectSize(current application's NSWindow's ¬
+			frameRectForContentRect:(current application's NSMakeRect(0, 0, 100, 100)) styleMask:15)) - 100
+		webV's setFrame:(current application's NSMakeRect(0, 0, item 1 of wh, (item 2 of wh) - pasek))
 	end if
 	-- 18 = rozciaganie w szerz i wzwyz; marginesy stale, wiec pas nad
 	-- strona trzyma wysokosc paska przy kazdej zmianie rozmiaru
@@ -219,6 +260,25 @@ on applyGlass()
 	
 	my tellGlass()
 end applyGlass
+
+-- {szerokosc, wysokosc} z NSRect - AppleScriptObjC oddaje go raz lista
+-- {{x, y}, {w, h}}, raz rekordem {origin:..., size:...}
+-- rozmiar przyciety do granic okna
+on fitSize(w, h)
+	if w < minW then set w to minW
+	if w > maxW then set w to maxW
+	if h < minH then set h to minH
+	if h > maxH then set h to maxH
+	return {w, h}
+end fitSize
+
+on rectSize(r)
+	try
+		return {(item 1 of item 2 of r) as real, (item 2 of item 2 of r) as real}
+	on error
+		return {(width of |size| of r) as real, (height of |size| of r) as real}
+	end try
+end rectSize
 
 on makeBackdrop()
 	if glassMode is "system" then return missing value
@@ -287,7 +347,79 @@ end glassTint
 -- po zmianie w Ustawieniach.
 on applicationDidBecomeActive:aNotification
 	my tellGlass()
+	my tellAccent()
 end applicationDidBecomeActive:
+
+-- ---------- kolor akcentu i ikony z systemu ----------
+
+-- Kolor z Ustawien -> Wyglad -> Kolor. Strona liczy z niego odcienie
+-- motywu. "Wielokolorowy" (brak AppleAccentColor) zostawia fiolet strony.
+-- Liczby ida jako calkowite 0-255 - ulamek AppleScript zamienilby na tekst
+-- z przecinkiem wedlug jezyka systemu.
+on tellAccent()
+	if webV is missing value then return
+	set js to "window.__accent&&window.__accent(null)"
+	try
+		set k to current application's NSUserDefaults's standardUserDefaults()'s objectForKey:"AppleAccentColor"
+		if k is not missing value then
+			set c to (current application's NSColor's controlAccentColor())'s colorUsingColorSpace:(current application's NSColorSpace's sRGBColorSpace())
+			set r to ((c's redComponent()) * 255 + 0.5) div 1
+			set g to ((c's greenComponent()) * 255 + 0.5) div 1
+			set b to ((c's blueComponent()) * 255 + 0.5) div 1
+			set js to "window.__accent&&window.__accent(" & r & "," & g & "," & b & ")"
+		end if
+	end try
+	try
+		webV's evaluateJavaScript:js completionHandler:(missing value)
+	end try
+end tellAccent
+
+-- Zmiana koloru w Ustawieniach dochodzi od razu, a nie dopiero po powrocie
+-- do okna: AppKit wysyla NSSystemColorsDidChangeNotification, a system
+-- rozglasza AppleColorPreferencesChangedNotification.
+on systemColorsChanged:aNotification
+	my tellAccent()
+end systemColorsChanged:
+
+on watchColors()
+	current application's NSNotificationCenter's defaultCenter()'s addObserver:me ¬
+		selector:"systemColorsChanged:" |name|:"NSSystemColorsDidChangeNotification" object:(missing value)
+	current application's NSDistributedNotificationCenter's defaultCenter()'s addObserver:me ¬
+		selector:"systemColorsChanged:" |name|:"AppleColorPreferencesChangedNotification" object:(missing value)
+end watchColors
+
+-- Ikony strony to SF Symbols. Strona nie ma do nich dostepu, wiec rysuje je
+-- aplikacja: symbol -> PNG -> base64. Strona uzywa ich jako maski, wiec
+-- kolor bierze z CSS. Rysowane raz, potem z pamieci.
+property symJS : ""
+on tellSymbols()
+	if webV is missing value then return
+	if symJS is "" then
+		set parts to {}
+		repeat with n in {"play.fill", "stop.fill", "square.and.arrow.up", "arrow.counterclockwise", "music.note", "globe", "circle.lefthalf.filled", "textformat", "xmark", "chevron.up", "chevron.down", "speaker.slash.fill", "speaker.wave.2.fill", "plus"}
+			try
+				set img to (current application's NSImage's imageWithSystemSymbolName:(n as text) accessibilityDescription:(missing value))
+				if img is not missing value then
+					-- 32 pt, waga regular (0), skala srednia (2); na stronie ~16 px,
+					-- wiec jest zapas na ekran Retina
+					set cfg to (current application's NSImageSymbolConfiguration's configurationWithPointSize:32 weight:0 |scale|:2)
+					set img to (img's imageWithSymbolConfiguration:cfg)
+					set rep to (current application's NSBitmapImageRep's imageRepWithData:(img's TIFFRepresentation()))
+					set png to (rep's representationUsingType:4 |properties|:(current application's NSDictionary's dictionary()))
+					set b64 to (png's base64EncodedStringWithOptions:0) as text
+					set end of parts to quote & (n as text) & quote & ":" & quote & "data:image/png;base64," & b64 & quote
+				end if
+			end try
+		end repeat
+		set oldTID to AppleScript's text item delimiters
+		set AppleScript's text item delimiters to ","
+		set my symJS to "window.__symbols&&window.__symbols({" & (parts as text) & "})"
+		set AppleScript's text item delimiters to oldTID
+	end if
+	try
+		webV's evaluateJavaScript:symJS completionHandler:(missing value)
+	end try
+end tellSymbols
 
 on setGlass:sender
 	try
@@ -349,10 +481,19 @@ end userContentController:didReceiveScriptMessage:
 -- Stan strony w jednym ciagu znakow. Znaczniki sa jezykowo neutralne:
 -- |L czasy w spoczynku, |P pauza, |O po czasie, |M wyciszone, |S numer dzwieku.
 on handleState(t)
+	-- strona wystartowala od nowa (takze po przeladowaniu przez sam WebKit):
+	-- stan trzeba jej podac jeszcze raz
+	if t is "__READY__" then
+		set my restored to false
+		return
+	end if
+	
 	-- pierwszy komunikat ze znacznikiem "|L" znaczy, ze skrypt strony ruszyl
 	-- i window.__loadAlarms juz istnieje
 	if restored is false and t contains "|L" then
 		set my restored to true
+		my tellAccent()
+		my tellSymbols()
 		my restoreSounds()
 		my tellGlass()
 	end if
