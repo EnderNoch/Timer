@@ -27,6 +27,13 @@ bundle sits on disk as `Timer.app`, the way Clock sits as `Clock.app`.
 Light and dark follow System Settings → Appearance, the color follows the
 accent, and the glass follows the Liquid Glass slider.
 
+The menu bar panel, opened from the timer icon:
+
+<p align="center">
+  <img src="screenshots/menubar-light.jpg" width="45%" alt="Menu bar panel, light appearance">
+  <img src="screenshots/menubar-dark.jpg" width="45%" alt="Menu bar panel, dark appearance">
+</p>
+
 ## Install
 
 1. Download [Timer.zip](https://github.com/EnderNoch/Timer/raw/main/Timer.zip)
@@ -139,6 +146,9 @@ app and use it on your own computer. This is not open source: copying the
 code, distributing it other than by a link to this repository, modifying it
 and training AI models on it require the author's written permission.
 
+Made by [EnderNoch](https://github.com/EnderNoch) (Atypical Maker) · part of
+[Atypical Maker Mac Apps](https://github.com/EnderNoch/Atypical-Maker-Mac-Apps).
+
 ---
 
 ## Po polsku
@@ -152,6 +162,13 @@ systemu: „Minutnik”, „Timer”, „Minuteur”… Pakiet leży na dysku ja
 
 Jasny i ciemny wygląd idą za Ustawieniami → Wygląd, kolor za akcentem, a szkło
 za suwakiem Liquid Glass.
+
+Panel z paska menu, otwierany ikoną minutnika:
+
+<p align="center">
+  <img src="screenshots/menubar-light.jpg" width="45%" alt="Panel z paska menu, jasny wygląd">
+  <img src="screenshots/menubar-dark.jpg" width="45%" alt="Panel z paska menu, ciemny wygląd">
+</p>
 
 ### W czym to jest zrobione
 
@@ -262,3 +279,5 @@ Wszelkie prawa zastrzeżone — patrz [LICENSE](LICENSE). Gotową aplikację wol
 pobrać i używać na własnym komputerze. To nie jest oprogramowanie otwarte:
 kopiowanie kodu, rozpowszechnianie inaczej niż linkiem do tego repozytorium,
 zmiany i trenowanie na nim modeli AI wymagają pisemnej zgody autora.
+
+Autor: [EnderNoch](https://github.com/EnderNoch) (Atypical Maker).

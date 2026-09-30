@@ -9,6 +9,12 @@ cd "$(dirname "$0")"
 NAME="Timer"
 ID="atyp.makers.timer.app"
 APP="/Applications/$NAME.app"
+# Autor w okienku O programie: "Copyright © 2026 EnderNoch (Atypical Maker).
+# Wszystkie prawa zastrzezone." - jak w aplikacjach Apple, z autorem zamiast Apple.
+AUTHOR="EnderNoch (Atypical Maker)"
+SINCE=2026
+YEARS="$SINCE"; [ "$(date +%Y)" != "$SINCE" ] && YEARS="$SINCE–$(date +%Y)"
+COPYRIGHT="Copyright © $YEARS $AUTHOR. All rights reserved."
 TMP="$(mktemp -d)"
 NEW="$TMP/$NAME.app"
 trap 'rm -rf "$TMP"' EXIT
@@ -55,22 +61,33 @@ cat > "$NEW/Contents/Info.plist" <<PLIST
 	<key>LSMinimumSystemVersion</key><string>26.0</string>
 	<key>LSApplicationCategoryType</key><string>public.app-category.utilities</string>
 	<key>NSHighResolutionCapable</key><true/>
+	<key>NSHumanReadableCopyright</key><string>$COPYRIGHT</string>
 </dict>
 </plist>
 PLIST
 
 # Tlumaczenia nazwy bierzemy od Apple: slowo "Timer" (klucz TIMER) z Zegara,
-# w kazdym jezyku, w jakim jest macOS - bez wlasnych tlumaczen.
-echo "› nazwa w jezyku systemu"
+# w kazdym jezyku, w jakim jest macOS - bez wlasnych tlumaczen. Linia praw
+# autorskich z O programie Photo Booth, z autorem w miejscu "Apple Inc.".
+echo "› nazwa i prawa autorskie w jezyku systemu"
 CLOCK=/System/Applications/Clock.app/Contents/Resources/Localizable.loctable
+BOOTH="/System/Applications/Photo Booth.app/Contents/Resources/InfoPlist.loctable"
 if [ -f "$CLOCK" ]; then
 	for L in ar ca cs da de el en en_AU en_CA en_GB en_PH es es_419 es_US fi fr fr_CA \
 	         he hi hr hu id it ja ko ms nl no pl pt_BR pt_PT ro ru sk sl sv th tr uk vi \
 	         zh_CN zh_HK zh_TW; do
 		T="$(plutil -extract "$L.TIMER" raw -o - "$CLOCK" 2>/dev/null)" || continue
 		mkdir -p "$NEW/Contents/Resources/$L.lproj"
-		printf '"CFBundleName" = "%s";\n"CFBundleDisplayName" = "%s";\n' "$T" "$T" \
-			> "$NEW/Contents/Resources/$L.lproj/InfoPlist.strings"
+		C="$(plutil -extract "$L.NSHumanReadableCopyright" raw -o - "$BOOTH" 2>/dev/null)" || C="$COPYRIGHT"
+		# Apple pisze tu rozne spacje: zwykla, nierozdzielajaca (cs, fr, ko, ru, uk) albo
+		# znaki kierunku tekstu wokol nazwy (he) - perl lapie je wszystkie, a znaki
+		# kierunku zostawia, zeby hebrajski dalej ukladal sie jak u Apple (tam po
+		# "Inc.⁩." zostawalaby podwojna kropka - druga podmiana ja zbiera).
+		C="$(printf '%s' "$C" | YEARS="$YEARS" AUTHOR="$AUTHOR" perl -CSDA -pe \
+			's/\d{4}(?:\x{2013}\d{4})?([\s\x{200F}\x{2068}]*)Apple[\s\x{00A0}]Inc\./$ENV{YEARS}$1$ENV{AUTHOR}./; s/\.(\x{2069})\./$1./')"
+		C="${C//\"/\\\"}"
+		printf '"CFBundleName" = "%s";\n"CFBundleDisplayName" = "%s";\n"NSHumanReadableCopyright" = "%s";\n' \
+			"$T" "$T" "$C" > "$NEW/Contents/Resources/$L.lproj/InfoPlist.strings"
 	done
 	echo "  $(ls -d "$NEW"/Contents/Resources/*.lproj | wc -l | tr -d ' ') jezykow, po polsku: $(plutil -extract pl.TIMER raw -o - "$CLOCK")"
 else

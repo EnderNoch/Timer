@@ -14,6 +14,9 @@ struct TimerApp: App {
         .windowBackgroundDragBehavior(.enabled)
         .defaultSize(width: 460, height: 820)
         .defaultLaunchBehavior(.presented)
+        // The app menu as in Photo Booth: About, Hide, Hide Others, Show All, Quit -
+        // without Services, which a timer has nothing to offer to.
+        .commands { CommandGroup(replacing: .systemServices) {} }
 
         // Always there; hiding it is System Settings → Menu Bar's job, and it keeps its place.
         MenuBarExtra {
