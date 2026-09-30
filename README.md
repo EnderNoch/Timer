@@ -11,17 +11,8 @@ Clock app, in the system's language: "Timer", "Minutnik", "Minuteur"… The
 bundle sits on disk as `Timer.app`, the way Clock sits as `Clock.app`.
 
 <p align="center">
-  <img src="screenshots/light-purple.jpg" width="19%" alt="Timer, idle, purple accent">
-  <img src="screenshots/light-running.jpg" width="19%" alt="Timer counting down">
-  <img src="screenshots/light-blue.jpg" width="19%" alt="Timer with a blue accent">
-  <img src="screenshots/light-green.jpg" width="19%" alt="Timer with a green accent">
-  <img src="screenshots/light-tinted.jpg" width="19%" alt="Timer with tinted glass">
-</p>
-<p align="center">
-  <img src="screenshots/dark-purple.jpg" width="19%" alt="Timer in dark appearance">
-  <img src="screenshots/dark-running.jpg" width="19%" alt="Timer counting down, dark appearance">
-  <img src="screenshots/dark-orange.jpg" width="19%" alt="Timer with an orange accent, dark appearance">
-  <img src="screenshots/dark-tinted.jpg" width="19%" alt="Timer with tinted glass, dark appearance">
+  <img src="screenshots/en-light-purple.jpg" width="32%" alt="Timer, light appearance">
+  <img src="screenshots/en-dark-purple.jpg" width="32%" alt="Timer, dark appearance">
 </p>
 
 Light and dark follow System Settings → Appearance, the color follows the
@@ -30,8 +21,8 @@ accent, and the glass follows the Liquid Glass slider.
 The menu bar panel, opened from the timer icon:
 
 <p align="center">
-  <img src="screenshots/menubar-light.jpg" width="45%" alt="Menu bar panel, light appearance">
-  <img src="screenshots/menubar-dark.jpg" width="45%" alt="Menu bar panel, dark appearance">
+  <img src="screenshots/en-menubar-light.jpg" width="45%" alt="Menu bar panel, light appearance">
+  <img src="screenshots/en-menubar-dark.jpg" width="45%" alt="Menu bar panel, dark appearance">
 </p>
 
 ## Install
@@ -46,6 +37,27 @@ The menu bar panel, opened from the timer icon:
    at login.
 
 Requires macOS 26 or later on a Mac with Apple silicon.
+
+## Languages
+
+The app speaks 43 languages and uses your Mac's language, like Apple's own
+apps — there is no language setting inside it. To give it a different language
+than the rest of the system, use System Settings → General → Language & Region
+→ Applications. The app's name follows too: "Timer" in English, "Minutnik" in
+Polish, "Minuteur" in French…
+
+Arabic (العربية), Bangla (বাংলা), Belarusian (беларуская), Bulgarian
+(български), Catalan (català), Chinese, Simplified (简体中文), Chinese,
+Traditional (繁體中文), Croatian (hrvatski), Czech (čeština), Danish (dansk),
+Dutch (Nederlands), English, Estonian (eesti), Finnish (suomi), French
+(français), German (Deutsch), Greek (Ελληνικά), Hebrew (עברית), Hindi (हिन्दी),
+Hungarian (magyar), Icelandic (íslenska), Indonesian (Indonesia), Italian
+(italiano), Japanese (日本語), Korean (한국어), Latvian (latviešu), Lithuanian
+(lietuvių), Malay (Bahasa Melayu), Norwegian Bokmål (norsk bokmål), Persian
+(فارسی), Polish (polski), Portuguese (português), Romanian (română), Russian
+(русский), Serbian (српски), Slovak (slovenčina), Slovenian (slovenščina),
+Spanish (español), Swedish (svenska), Thai (ไทย), Turkish (Türkçe), Ukrainian
+(українська), Vietnamese (Tiếng Việt).
 
 ## Everything from the system
 
@@ -160,6 +172,20 @@ W Finderze, Docku i menu nazywa się jak timer w Zegarze macOS, w języku
 systemu: „Minutnik”, „Timer”, „Minuteur”… Pakiet leży na dysku jako
 `Timer.app`, tak jak Zegar leży jako `Clock.app`.
 
+<p align="center">
+  <img src="screenshots/light-purple.jpg" width="19%" alt="Minutnik w spoczynku, akcent fioletowy">
+  <img src="screenshots/light-running.jpg" width="19%" alt="Minutnik w trakcie odliczania">
+  <img src="screenshots/light-blue.jpg" width="19%" alt="Minutnik z akcentem niebieskim">
+  <img src="screenshots/light-green.jpg" width="19%" alt="Minutnik z akcentem zielonym">
+  <img src="screenshots/light-tinted.jpg" width="19%" alt="Minutnik przy zabarwionym szkle">
+</p>
+<p align="center">
+  <img src="screenshots/dark-purple.jpg" width="19%" alt="Minutnik w ciemnym wyglądzie">
+  <img src="screenshots/dark-running.jpg" width="19%" alt="Minutnik w trakcie odliczania, ciemny wygląd">
+  <img src="screenshots/dark-orange.jpg" width="19%" alt="Minutnik z akcentem pomarańczowym, ciemny wygląd">
+  <img src="screenshots/dark-tinted.jpg" width="19%" alt="Minutnik przy zabarwionym szkle, ciemny wygląd">
+</p>
+
 Jasny i ciemny wygląd idą za Ustawieniami → Wygląd, kolor za akcentem, a szkło
 za suwakiem Liquid Glass.
 
@@ -183,6 +209,21 @@ Panel z paska menu, otwierany ikoną minutnika:
 
 Bez projektu Xcode i bez zależności — `swiftc` i `actool` (ten z Xcode, do
 ikony). Wymaga macOS 26.
+
+### Języki
+
+Aplikacja mówi w 43 językach i używa języka Maca, jak aplikacje Apple — nie ma
+w niej wyboru języka. Inny język tylko dla niej ustawia się w Ustawieniach
+systemowych → Ogólne → Język i region → Aplikacje. Nazwa też idzie za językiem:
+„Minutnik” po polsku, „Timer” po angielsku, „Minuteur” po francusku…
+
+angielski, arabski, bengalski, białoruski, bułgarski, chiński tradycyjny,
+chiński uproszczony, chorwacki, czeski, duński, estoński, fiński, francuski,
+grecki, hebrajski, hindi, hiszpański, indonezyjski, islandzki, japoński,
+kataloński, koreański, litewski, łotewski, malajski, niderlandzki, niemiecki,
+norweski (bokmål), perski, polski, portugalski, rosyjski, rumuński, serbski,
+słowacki, słoweński, szwedzki, tajski, turecki, ukraiński, węgierski,
+wietnamski, włoski.
 
 ### Wszystko z systemu
 
