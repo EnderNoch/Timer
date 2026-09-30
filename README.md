@@ -11,17 +11,17 @@ Clock app, in the system's language: "Timer", "Minutnik", "Minuteur"… The
 bundle sits on disk as `Timer.app`, the way Clock sits as `Clock.app`.
 
 <p align="center">
-  <img src="zrzuty/light-purple.jpg" width="19%" alt="Timer, idle, purple accent">
-  <img src="zrzuty/light-running.jpg" width="19%" alt="Timer counting down">
-  <img src="zrzuty/light-blue.jpg" width="19%" alt="Timer with a blue accent">
-  <img src="zrzuty/light-green.jpg" width="19%" alt="Timer with a green accent">
-  <img src="zrzuty/light-tinted.jpg" width="19%" alt="Timer with tinted glass">
+  <img src="screenshots/light-purple.jpg" width="19%" alt="Timer, idle, purple accent">
+  <img src="screenshots/light-running.jpg" width="19%" alt="Timer counting down">
+  <img src="screenshots/light-blue.jpg" width="19%" alt="Timer with a blue accent">
+  <img src="screenshots/light-green.jpg" width="19%" alt="Timer with a green accent">
+  <img src="screenshots/light-tinted.jpg" width="19%" alt="Timer with tinted glass">
 </p>
 <p align="center">
-  <img src="zrzuty/dark-purple.jpg" width="19%" alt="Timer in dark appearance">
-  <img src="zrzuty/dark-running.jpg" width="19%" alt="Timer counting down, dark appearance">
-  <img src="zrzuty/dark-orange.jpg" width="19%" alt="Timer with an orange accent, dark appearance">
-  <img src="zrzuty/dark-tinted.jpg" width="19%" alt="Timer with tinted glass, dark appearance">
+  <img src="screenshots/dark-purple.jpg" width="19%" alt="Timer in dark appearance">
+  <img src="screenshots/dark-running.jpg" width="19%" alt="Timer counting down, dark appearance">
+  <img src="screenshots/dark-orange.jpg" width="19%" alt="Timer with an orange accent, dark appearance">
+  <img src="screenshots/dark-tinted.jpg" width="19%" alt="Timer with tinted glass, dark appearance">
 </p>
 
 Light and dark follow System Settings → Appearance, the color follows the
@@ -106,7 +106,7 @@ AppKit, ringtone names from the system's tone library.
 | Sound | `NSSound` — the system's ringtones from `ToneLibrary.framework`, the same as in Clock |
 | Settings | `UserDefaults` (time, presets, ringtone) |
 | Icon | `Timer.icon` from Icon Composer — the system does the glass and icon styles |
-| Build | `zbuduj.sh` — `swiftc`, `actool`, `Info.plist`, `codesign --sign -` (ad hoc) |
+| Build | `build.sh` — `swiftc`, `actool`, `Info.plist`, `codesign --sign -` (ad hoc) |
 
 No Xcode project and no dependencies — `swiftc` and `actool` (from Xcode, for
 the icon).
@@ -119,14 +119,14 @@ Sources/Model.swift      timer state, sound, saving, the system accent
 Sources/Views.swift      dial, buttons, time entry, sections, window glass
 Sources/Strings.swift    text in 43 languages
 Timer.icon               the icon from Icon Composer (SVG layers + icon.json)
-zbuduj.sh                build, Timer.zip, install into /Applications
-zrzuty/                  screenshots for this README
+build.sh                 build, Timer.zip, install into /Applications
+screenshots/             screenshots for this README
 ```
 
 ## Build from source
 
 ```sh
-./zbuduj.sh
+./build.sh
 ```
 
 The script compiles, puts together `Timer.app`, signs it ad hoc, packs it into
@@ -162,7 +162,7 @@ za suwakiem Liquid Glass.
 | Dźwięk | `NSSound` — dzwonki systemu z `ToneLibrary.framework`, te same co w Zegarze |
 | Pamięć ustawień | `UserDefaults` (czas, presety, dzwonek) |
 | Ikona | `Timer.icon` z Icon Composera — szkło i style ikon (ciemny, przejrzysty, matowy) robi system |
-| Budowanie | `zbuduj.sh` — `swiftc`, `actool`, `Info.plist`, `codesign --sign -` (ad-hoc) |
+| Budowanie | `build.sh` — `swiftc`, `actool`, `Info.plist`, `codesign --sign -` (ad-hoc) |
 
 Bez projektu Xcode i bez zależności — `swiftc` i `actool` (ten z Xcode, do
 ikony). Wymaga macOS 26.
@@ -230,8 +230,8 @@ Sources/Model.swift      stan timera, dźwięk, zapis, akcent systemu
 Sources/Views.swift      tarcza, przyciski, pola czasu, sekcje, szkło okna
 Sources/Strings.swift    teksty w 43 językach
 Timer.icon               ikona z Icon Composera (warstwy SVG + icon.json)
-zbuduj.sh                budowanie, Timer.zip i instalacja w /Applications
-zrzuty/                  zrzuty ekranu do README
+build.sh                 budowanie, Timer.zip i instalacja w /Applications
+screenshots/             zrzuty ekranu do README
 ```
 
 ### Instalacja
@@ -250,7 +250,7 @@ Wymaga macOS 26 lub nowszego i Maca z procesorem Apple.
 ### Budowanie ze źródeł
 
 ```sh
-./zbuduj.sh
+./build.sh
 ```
 
 Skrypt kompiluje, składa pakiet `Timer.app`, podpisuje go ad-hoc, pakuje

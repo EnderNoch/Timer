@@ -37,7 +37,7 @@ final class Model {
     /// which keeps the timer's violet.
     private(set) var accent = Model.readAccent()
 
-    /// The name in the system's language, from the bundle's localized Info.plist (zbuduj.sh).
+    /// The name in the system's language, from the bundle's localized Info.plist (build.sh).
     static let appName = Bundle.main.localizedInfoDictionary?["CFBundleDisplayName"] as? String
         ?? Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String ?? "Timer"
 
