@@ -1,152 +1,264 @@
-# Prosty timer
+# Timer
 
-Timer na macOS: duże koło odliczające, alarm z własnym dźwiękiem, presety czasów
-i ikona w pasku menu. Jedno okno, bez ustawień, których nikt nie czyta.
+*[Po polsku niżej.](#po-polsku)*
 
-## W czym to jest zrobione
+A timer for macOS: a big countdown dial, an alarm from the system's ringtones,
+saved times, and the time in the menu bar. One window, and none of the settings
+the system already gives you.
 
-| Warstwa | Technologia |
+In Finder, the Dock and the menu bar it is named like the timer in the macOS
+Clock app, in the system's language: "Timer", "Minutnik", "Minuteur"… The
+bundle sits on disk as `Timer.app`, the way Clock sits as `Clock.app`.
+
+<p align="center">
+  <img src="zrzuty/light-purple.jpg" width="19%" alt="Timer, idle, purple accent">
+  <img src="zrzuty/light-running.jpg" width="19%" alt="Timer counting down">
+  <img src="zrzuty/light-blue.jpg" width="19%" alt="Timer with a blue accent">
+  <img src="zrzuty/light-green.jpg" width="19%" alt="Timer with a green accent">
+  <img src="zrzuty/light-tinted.jpg" width="19%" alt="Timer with tinted glass">
+</p>
+<p align="center">
+  <img src="zrzuty/dark-purple.jpg" width="19%" alt="Timer in dark appearance">
+  <img src="zrzuty/dark-running.jpg" width="19%" alt="Timer counting down, dark appearance">
+  <img src="zrzuty/dark-orange.jpg" width="19%" alt="Timer with an orange accent, dark appearance">
+  <img src="zrzuty/dark-tinted.jpg" width="19%" alt="Timer with tinted glass, dark appearance">
+</p>
+
+Light and dark follow System Settings → Appearance, the color follows the
+accent, and the glass follows the Liquid Glass slider.
+
+## Install
+
+1. Download [Timer.zip](https://github.com/EnderNoch/Timer/raw/main/Timer.zip)
+   and unzip it (double-click).
+2. Drag `Timer.app` into Applications. Finder and the Dock show it under its
+   name in your system's language.
+3. First launch: the app is signed ad hoc, not by Apple, so macOS blocks it.
+   Open System Settings → Privacy & Security, scroll down, click "Open Anyway"
+   next to Timer and confirm. After that it opens normally — also on its own
+   at login.
+
+Requires macOS 26 or later on a Mac with Apple silicon.
+
+## Everything from the system
+
+The app has no switches for what the system already provides:
+
+- **language** — the system's language (or this app's language from System
+  Settings → General → Language & Region), 43 interface languages;
+- **light / dark appearance, font** — as set in System Settings → Appearance,
+  the system font;
+- **color** — the accent from System Settings → Appearance → Color; a change
+  arrives at once (KVO on `AppleAccentColor` and
+  `NSColor.systemColorsDidChangeNotification`). Multicolor keeps the timer's
+  violet;
+- **glass** — the system's Liquid Glass, so it follows the slider in Settings;
+- **icons** — SF Symbols; the app icon is a Liquid Glass icon from Icon
+  Composer that follows the icon style (default, dark, clear, tinted);
+- **name** — the word "Timer" from the Clock app's localization tables
+  (`Localizable.loctable`, key `TIMER`), written into `*.lproj/InfoPlist.strings`
+  at build time.
+
+## Layout
+
+At the top, a dial that grows with the window: a glass disc, a tinted lens
+with the time in the middle, and the arc is the time left on a kitchen
+timer's face — one full turn is an hour — with a knob at its end. While idle,
+turning the knob adds or takes away minutes from the set time (typed hours and
+seconds stay), and clicking the time lets you type it into a `00:00:00` field
+with fixed colons: digits only, coming in from the right like on a microwave
+(1, 5, 0, 0 is 00:15:00), Backspace takes one back, Return finishes.
+
+Under the dial, two buttons with icons: Save (adds the time to the presets)
+and Start while idle, Cancel (Esc) and Pause / Resume / Stop while it runs.
+Below, glass sections with an icon leading each row: the sound (a list of the
+system's ringtones at the right edge — picking one plays it for as long as the
+Apex ringtone, 4.4 s) and the presets (a click loads one, the cross deletes).
+
+The window has bounds like System Settings — from 420×750 to 560×1100, no full
+screen. Closing the window doesn't quit the timer: it keeps counting in the
+menu bar, and a click on the Dock icon brings the window back.
+
+## What it does
+
+- countdown, pause, cancel, counting on over time (in red)
+- the alarm from the system's ringtones — the same ones the Clock app has
+  (`ToneLibrary.framework/…/Ringtones`), named in the system's language from
+  the `TL.loctable` tables; Radar by default, like the timer in Clock on iPhone
+- presets
+- opens at login — switched on by itself at the first launch (`SMAppService`);
+  switched off in System Settings → General → Login Items, with no switch in
+  the app
+- menu bar: the time while counting down; a click opens a panel like Control
+  Center — the time with a small ring, the buttons, presets to start with one
+  click, mute over time, "Open Timer" and Quit
+
+Words macOS has for itself come from its own localization tables: Start,
+Pause, Resume, Cancel and Sound from the Clock app, Delete and Save from
+AppKit, ringtone names from the system's tone library.
+
+## Built with
+
+| Layer | Technology |
 | --- | --- |
-| Interfejs | jeden plik `prosty timer.html` — czysty HTML + CSS + JavaScript (bez frameworków, bez zależności, bez sieci) |
-| Dźwięk w przeglądarce | Web Audio API (`AudioContext`, `decodeAudioData`) |
-| Pamięć ustawień | `localStorage` (presety, język, motyw, font, wybrany dźwięk) |
-| Aplikacja macOS | `Prosty Timer.applescript` — AppleScriptObjC (AppleScript wołający wprost Cocoa: AppKit, WebKit, Foundation), zbudowany jako **zwykła aplikacja** — bez `LSUIElement`, więc widzą ją narzędzia listujące aplikacje (np. mikser głośności) |
-| Okno aplikacji | `WKWebView` — natywne okno, w środku ta sama strona |
-| Szkło | kontrolki rysuje CSS; opcjonalne szkło na całe okno to `NSGlassEffectView` (macOS 26) z zapasowym `NSVisualEffectView` |
-| Alarm w aplikacji | `NSSound` przez systemowe wyjście — głośnością zarządza mikser systemu |
-| Pasek menu | `NSStatusItem` + `NSMenu`, odświeżane komunikatem ze strony |
-| Budowanie | `zbuduj.sh` — `osacompile`, `PlistBuddy`, `codesign --sign -` (ad-hoc) |
+| App | Swift + SwiftUI: `Window` and `MenuBarExtra`, state in `@Observable` |
+| Glass | `NSGlassEffectView` for the whole window, `.glassEffect` on the dial and sections, `.glass` / `.glassProminent` buttons |
+| Sound | `NSSound` — the system's ringtones from `ToneLibrary.framework`, the same as in Clock |
+| Settings | `UserDefaults` (time, presets, ringtone) |
+| Icon | `Timer.icon` from Icon Composer — the system does the glass and icon styles |
+| Build | `zbuduj.sh` — `swiftc`, `actool`, `Info.plist`, `codesign --sign -` (ad hoc) |
 
-Cały interfejs to około 730 linii HTML-a, aplikacja to około 650 linii
-AppleScriptObjC. Zero bibliotek do pobrania — strona działa też sama z siebie,
-otwarta w dowolnej przeglądarce.
+No Xcode project and no dependencies — `swiftc` and `actool` (from Xcode, for
+the icon).
 
-## Szkło
-
-Apple rozpisuje szkło jako **warstwę pływającą nad treścią** — paski narzędzi,
-paski boczne, menu, przyciski — i wprost odradza robienie z niego tła na całe
-okno. Domyślnie aplikacja trzyma się tej zasady: okno jest zwykłym oknem,
-a szklane są same kontrolki strony.
-
-Dwa pozostałe tryby robią jednak z całego okna taflę, bo dla timera parkowanego
-na pulpicie to ma sens. Wtedy okno przestaje być kryjące, a `WKWebView` przestaje
-malować własne tło (`drawsBackground` = fałsz) — inaczej zasłoniłby szkło płytą.
-
-Szkło idzie na całe okno, także pod pasek tytułu (`fullSizeContentView`),
-ale strona kończy się **pod** paskiem — w pustej oprawce, w obszarze
-`contentLayoutRect`. Pas nad stroną to sama tafla, więc nazwa i przyciski
-okna mają za sobą szkło, a okno da się za ten pas złapać
-(`mouseDownCanMoveWindow`).
-
-Obie prostsze drogi odpadły. Kiedy strona sięgała pod pasek, przykrywała
-jedyne miejsce, za które okno się łapie — `WKWebView` połyka ruchy myszy.
-Kiedy pasek zostawał zwykłym paskiem, w macOS 27 nie malował już tła nad
-niekryjącym oknem i nazwa wisiała na gołym pulpicie. Pusty `NSToolbar` też
-nie pomógł: w Golden Gate taflę dostają dopiero elementy paska.
-
-| Tryb | Co rysuje tło | Menu |
-| --- | --- | --- |
-| `system` | nic — zwykłe okno z paskiem tytułu, szkło tylko na kontrolkach | Tło okna → Jak w systemie |
-| `liquid` (domyślny) | `NSGlassEffectView` — prawdziwe zaginanie światła z macOS 26 | Tło okna → Szkło na całe okno |
-| `frost` | `NSVisualEffectView`, materiał `underWindowBackground` — matowe rozmycie | Tło okna → Szkło matowe na całe okno |
-
-Wybór zapisuje się w `ustawienia.plist`. Aplikacja mówi o nim stronie przez
-`window.__glass(1|0)`, a strona ustawia sobie `html[data-glass="1"]` i chowa
-własne tło.
-
-Same kontrolki są szklane po obu stronach — także w przeglądarce, gdzie tła
-nie ma. Tafla to wypełnienie, `backdrop-filter`, refleks na górnej krawędzi,
-cienki rant i miękki cień; kształt to kapsuła, jak w dzisiejszym macOS.
-W przeglądarce rozmycie bierze poświatę malowaną przez `body::before` —
-w oknie aplikacji tej poświaty nie ma, bo pod spodem jest już prawdziwe szkło
-(CSS-owy `backdrop-filter` nie sięga do treści natywnej pod `WKWebView`).
-
-## Układ
-
-Styl to Liquid Glass, a układ idzie za tym, jak macOS 26/27 układa własne
-aplikacje. Wyzeruj i Start stoją pod tarczą jak w Zegarze, a Start jest
-przyciskiem głównym, wypełnionym akcentem. Reszta siedzi w sekcjach jak
-w Ustawieniach systemowych: jedna tafla na sekcję (dźwięk, presety, wygląd),
-w środku wiersze bez własnych ramek, rozdzielone cienką kreską. Wiersze
-wyglądu mają ikony zamiast podpisów, bo podpisy trzeba by tłumaczyć na
-43 języki. W oknie aplikacji strona nie powtarza swojej nazwy — stoi już
-na pasku tytułu.
-
-Układ jest jeden, pionowy — tarcza, pod nią przyciski, niżej sekcje
-sięgające do marginesów. Okno ma granice jak Ustawienia systemowe:
-od 420×750 do 560×1100 i bez pełnego ekranu. Tarcza rośnie z wysokością
-okna, a przy wielu presetach przewija się tylko ich sekcja.
-
-Kolor i ikony idą z systemu. Aplikacja podaje stronie kolor akcentu
-z Ustawień → Wygląd → Kolor (`window.__accent`), a strona liczy z niego
-odcienie motywu; zmiana w Ustawieniach dochodzi od razu, bez przełączania
-okien. Przy „wielokolorowym” akcencie zostaje fiolet timera. Ikony to
-SF Symbols — rysuje je aplikacja i podaje jako PNG (`window.__symbols`),
-a strona używa ich jako maski w kolorze tekstu. W przeglądarce zostają
-rysunki SVG.
-
-## Jak strona rozmawia z aplikacją
-
-Stan timera jedzie do aplikacji jednym ciągiem znaków z neutralnymi językowo
-znacznikami. Wysyła go funkcja `chan()` w pliku HTML — **tylko wtedy, gdy ciąg
-się zmieni** — przez `window.webkit.messageHandlers.timer`, czyli
-`WKScriptMessageHandler` (`addScriptMessageHandler:name:`). Ten sam ciąg ląduje
-w `document.title`, żeby było go widać w przeglądarce, ale nikt go stamtąd nie
-czyta.
-
-Nic tu nie odpytuje w kółko: WebKit sam woła aplikację, gdy stan się zmieni.
-Przy nieruszonym timerze aplikacja nie wykonuje **ani jednej** instrukcji,
-a przy odliczaniu najwyżej jedną wiadomość na sekundę — mimo że rysowanie
-tarczy chodzi dziesięć razy na sekundę.
+## Files
 
 ```
-Prosty timer |L300,600      spoczynek + zapisane presety
-12:34 |P                    pauza
-00:00 |O |S2                po czasie, graj dźwięk numer 2
-__PICK__                    strona prosi o okno wyboru plików
-__PLAY__ |T… |S1            posłuchaj dźwięku numer 1
-__RESET__                   wróć do dźwięku domyślnego
+Sources/TimerApp.swift   the app: window, menu bar, Dock
+Sources/Model.swift      timer state, sound, saving, the system accent
+Sources/Views.swift      dial, buttons, time entry, sections, window glass
+Sources/Strings.swift    text in 43 languages
+Timer.icon               the icon from Icon Composer (SVG layers + icon.json)
+zbuduj.sh                build, Timer.zip, install into /Applications
+zrzuty/                  screenshots for this README
 ```
 
-W drugą stronę aplikacja woła `evaluateJavaScript:` — stąd funkcje
-`window.__cmd`, `window.__loadAlarms`, `window.__pickDone` w pliku HTML.
-Dzięki temu polecenia z paska menu (Pauza, Wycisz, Wyzeruj) i wybór plików
-z Findera trafiają do tej samej, jedynej logiki timera w JavaScripcie.
-
-## Co potrafi
-
-- odliczanie z kołem postępu, pauza, zerowanie, liczenie po czasie („po czasie”)
-- własne dźwięki alarmu — pojedynczy plik albo cały folder z listą wyboru
-- presety czasów zapisywane jednym przyciskiem
-- 43 języki interfejsu, motyw jasny/ciemny
-- font OpenDyslexic, jeśli jest zainstalowany w systemie
-- szklane kontrolki, a tło okna w trzech stopniach (jak w systemie / Liquid Glass / matowe)
-
-## Pliki
-
-```
-prosty timer.html        cała aplikacja: interfejs, logika, tłumaczenia
-Prosty Timer.applescript źródło aplikacji macOS (AppleScriptObjC)
-Prosty timer.icns        ikona aplikacji
-zbuduj.sh                budowanie i instalacja w /Applications
-```
-
-## Uruchomienie
-
-Sama strona — otwórz `prosty timer.html` w przeglądarce.
-
-Aplikacja macOS:
+## Build from source
 
 ```sh
 ./zbuduj.sh
 ```
 
-Skrypt kompiluje AppleScript, składa pakiet `.app`, podpisuje go ad-hoc
-i instaluje w `/Applications`. Poprzednia wersja ląduje w
-`~/Library/Application Support/ProstyTimer/kopie`.
+The script compiles, puts together `Timer.app`, signs it ad hoc, packs it into
+`Timer.zip` and installs it into `/Applications`.
 
-## Licencja
+## License
 
-Wszelkie prawa zastrzeżone — patrz [LICENSE](LICENSE). To nie jest
-oprogramowanie otwarte: kopiowanie, rozpowszechnianie i modyfikowanie kodu
-wymaga pisemnej zgody autora.
+All rights reserved — see [LICENSE](LICENSE). You may download the finished
+app and use it on your own computer. This is not open source: copying the
+code, distributing it other than by a link to this repository, modifying it
+and training AI models on it require the author's written permission.
+
+---
+
+## Po polsku
+
+Timer na macOS: duża tarcza odliczająca, alarm z własnym dźwiękiem, zapisane
+czasy i czas w pasku menu. Jedno okno i żadnych ustawień, które daje system.
+
+W Finderze, Docku i menu nazywa się jak timer w Zegarze macOS, w języku
+systemu: „Minutnik”, „Timer”, „Minuteur”… Pakiet leży na dysku jako
+`Timer.app`, tak jak Zegar leży jako `Clock.app`.
+
+Jasny i ciemny wygląd idą za Ustawieniami → Wygląd, kolor za akcentem, a szkło
+za suwakiem Liquid Glass.
+
+### W czym to jest zrobione
+
+| Warstwa | Technologia |
+| --- | --- |
+| Aplikacja | Swift + SwiftUI: `Window` i `MenuBarExtra`, stan w `@Observable` |
+| Szkło | `NSGlassEffectView` na całe okno, `.glassEffect` na tarczy i sekcjach, przyciski `.glass` / `.glassProminent` |
+| Dźwięk | `NSSound` — dzwonki systemu z `ToneLibrary.framework`, te same co w Zegarze |
+| Pamięć ustawień | `UserDefaults` (czas, presety, dzwonek) |
+| Ikona | `Timer.icon` z Icon Composera — szkło i style ikon (ciemny, przejrzysty, matowy) robi system |
+| Budowanie | `zbuduj.sh` — `swiftc`, `actool`, `Info.plist`, `codesign --sign -` (ad-hoc) |
+
+Bez projektu Xcode i bez zależności — `swiftc` i `actool` (ten z Xcode, do
+ikony). Wymaga macOS 26.
+
+### Wszystko z systemu
+
+Aplikacja nie ma przełączników, które system już daje:
+
+- **język** — język systemu (albo język tej aplikacji z Ustawień → Ogólne →
+  Język i region), 43 języki interfejsu;
+- **jasny / ciemny wygląd, czcionka** — jak w Ustawieniach → Wygląd, czcionka
+  systemu;
+- **kolor** — akcent z Ustawień → Wygląd → Kolor; zmiana dochodzi od razu
+  (KVO na `AppleAccentColor` i `NSColor.systemColorsDidChangeNotification`).
+  Przy „wielokolorowym” zostaje fiolet timera;
+- **szkło** — systemowe Liquid Glass, więc idzie za suwakiem w Ustawieniach;
+- **ikony** — SF Symbols;
+- **nazwa** — słowo „Timer” z tabel tłumaczeń Zegara macOS
+  (`Localizable.loctable`, klucz `TIMER`), wpisywane przy budowaniu do
+  `*.lproj/InfoPlist.strings`.
+
+### Układ
+
+Jak Światło ekranu. Na górze tarcza, która rośnie z wysokością okna: szklany
+krążek, w środku przyciemniona soczewka z czasem, a łuk to czas na tarczy
+minutnika kuchennego — pełny obrót to godzina — z gałką na końcu. W spoczynku
+obrót gałki dodaje albo odejmuje minuty od ustawionego czasu (wpisane godziny
+i sekundy zostają), a w liczbę da się kliknąć i wpisać czas
+w pole `00:00:00` ze stałymi dwukropkami: same cyfry, wpadające od prawej
+jak w mikrofalówce (1, 5, 0, 0 to 00:15:00), Backspace cofa, Return kończy.
+
+Pod tarczą dwa przyciski z ikonami: w spoczynku Zachowaj (dopisuje czas do
+presetów) i Start, w trakcie Anuluj i Pauza / Wznów / Zatrzymaj. Niżej
+szklane sekcje z ikoną na początku wiersza: dźwięk (lista dzwonków systemu
+przy prawej krawędzi — wybrany gra najwyżej tyle, ile dzwonek Apeks, 4,4 s) i presety (klik wczytuje,
+krzyżyk usuwa).
+
+Okno ma granice jak Ustawienia: od 420×750 do 560×1100 i bez pełnego
+ekranu. Zamknięcie okna nie zamyka timera: odlicza dalej w pasku menu,
+a kliknięcie ikony w Docku przywraca okno.
+
+### Co potrafi
+
+- odliczanie, pauza, anulowanie, liczenie po czasie („po czasie”, na czerwono)
+- alarm z dzwonków systemu — tych samych, które ma Zegar
+  (`ToneLibrary.framework/…/Ringtones`), z nazwami w języku systemu z tabel
+  `TL.loctable`; domyślnie Radar, jak minutnik w Zegarze na iPhonie
+- presety czasów
+- otwieranie przy logowaniu — włącza się samo przy pierwszym uruchomieniu
+  (`SMAppService`); wyłącza się w Ustawieniach → Ogólne → Rzeczy otwierane
+  podczas logowania, bez przełącznika w aplikacji
+- pasek menu: czas w trakcie odliczania, a po kliknięciu panel jak Centrum
+  sterowania — czas z małym pierścieniem, przyciski, presety do startu jednym
+  kliknięciem, wyciszenie po czasie, „Otwórz Minutnik” i Zakończ
+
+Słowa, które macOS ma u siebie, są wzięte z jego tabel tłumaczeń: Start,
+Pauza, Wznów, Anuluj i Dźwięk z Zegara, Usuń i Zachowaj z AppKit, nazwy
+dzwonków z biblioteki dźwięków systemu.
+
+### Pliki
+
+```
+Sources/TimerApp.swift   aplikacja: okno, pasek menu, Dock
+Sources/Model.swift      stan timera, dźwięk, zapis, akcent systemu
+Sources/Views.swift      tarcza, przyciski, pola czasu, sekcje, szkło okna
+Sources/Strings.swift    teksty w 43 językach
+Timer.icon               ikona z Icon Composera (warstwy SVG + icon.json)
+zbuduj.sh                budowanie, Timer.zip i instalacja w /Applications
+zrzuty/                  zrzuty ekranu do README
+```
+
+### Instalacja
+
+1. Pobierz [Timer.zip](https://github.com/EnderNoch/Timer/raw/main/Timer.zip)
+   i rozpakuj go (dwuklik).
+2. Przeciągnij `Timer.app` do folderu Aplikacje. W Finderze i Docku pokaże się
+   jako „Minutnik” (albo „Timer” — w języku systemu).
+3. Pierwsze uruchomienie: aplikacja jest podpisana ad-hoc, nie przez Apple,
+   więc macOS ją zablokuje. Otwórz Ustawienia → Prywatność i ochrona,
+   przewiń w dół i kliknij „Otwórz mimo to” przy Minutniku, potem potwierdź.
+   Później otwiera się już normalnie — także sama przy logowaniu.
+
+Wymaga macOS 26 lub nowszego i Maca z procesorem Apple.
+
+### Budowanie ze źródeł
+
+```sh
+./zbuduj.sh
+```
+
+Skrypt kompiluje, składa pakiet `Timer.app`, podpisuje go ad-hoc, pakuje
+do `Timer.zip` i instaluje w `/Applications`.
+
+### Licencja
+
+Wszelkie prawa zastrzeżone — patrz [LICENSE](LICENSE). Gotową aplikację wolno
+pobrać i używać na własnym komputerze. To nie jest oprogramowanie otwarte:
+kopiowanie kodu, rozpowszechnianie inaczej niż linkiem do tego repozytorium,
+zmiany i trenowanie na nim modeli AI wymagają pisemnej zgody autora.
