@@ -8,7 +8,7 @@ final class Model {
 
     enum Mode { case idle, running, paused, over }
 
-    @ObservationIgnored private let ud = UserDefaults.standard
+    @ObservationIgnored private let ud = Background.defaults
     /// Opens the window; set by any view that has `openWindow`.
     @ObservationIgnored var openMain: (() -> Void)?
 
@@ -19,8 +19,8 @@ final class Model {
     /// The alarm: a file name in the system's ringtones, as the Clock app picks its sounds.
     var tone: String { didSet { ud.set(tone, forKey: "tone") } }
 
-    private(set) var mode = Mode.idle
-    private(set) var muted = false
+    private(set) var mode = Mode.idle { didSet { saveRun() } }
+    private(set) var muted = false { didSet { saveRun() } }
     /// A preview of the alarm is playing.
     private(set) var testing = false
     /// Ticks while counting down or over time; the views read the time from here.
@@ -50,6 +50,38 @@ final class Model {
         presets = ud.array(forKey: "presets") as? [Int] ?? []
         // Radar, the timer's sound in the Clock app on iPhone
         tone = ud.string(forKey: "tone") ?? "Radar.m4r"
+        restoreRun()
+    }
+
+    /// A running timer is saved too, so the helper in the background (Background.swift) and
+    /// the app opened again carry on with the same countdown.
+    private func saveRun() {
+        let name = switch mode { case .idle: "idle"; case .running: "running"; case .paused: "paused"; case .over: "over" }
+        ud.set(name, forKey: "runMode")
+        ud.set(endAt.timeIntervalSinceReferenceDate, forKey: "runEnd")
+        ud.set(pausedLeft, forKey: "runPausedLeft")
+        ud.set(muted, forKey: "runMuted")
+    }
+
+    /// Quitting for real ends the countdown; only the helper carries it on.
+    func forgetRun() {
+        ud.set("idle", forKey: "runMode")
+    }
+
+    private func restoreRun() {
+        // Read before setting anything: every change saves the whole run again.
+        let saved = ud.string(forKey: "runMode")
+        endAt = Date(timeIntervalSinceReferenceDate: ud.double(forKey: "runEnd"))
+        pausedLeft = ud.double(forKey: "runPausedLeft")
+        muted = ud.bool(forKey: "runMuted")
+        switch saved {
+        case "running": mode = endAt > Date() ? .running : .over
+        case "paused": mode = .paused
+        case "over": mode = .over
+        default: return
+        }
+        if mode != .paused { setTicking(true) }
+        if mode == .over, !muted { play(loop: true) }
     }
 
     /// The system's language, as in any Mac app.
@@ -214,7 +246,7 @@ final class Model {
     func launch() {
         // Opens at login from the first launch. Only once: switching it off is System
         // Settings → General → Login Items' job, and a later launch mustn't undo that.
-        if !ud.bool(forKey: "loginSetUp") {
+        if !Background.isHelper, !ud.bool(forKey: "loginSetUp") {
             try? SMAppService.mainApp.register()
             ud.set(true, forKey: "loginSetUp")
         }

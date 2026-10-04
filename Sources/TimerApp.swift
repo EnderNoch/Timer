@@ -13,7 +13,8 @@ struct TimerApp: App {
         .windowResizability(.contentSize)
         .windowBackgroundDragBehavior(.enabled)
         .defaultSize(width: 460, height: 820)
-        .defaultLaunchBehavior(.presented)
+        // The helper that runs in the background has no window of its own.
+        .defaultLaunchBehavior(Background.isHelper ? .suppressed : .presented)
         // The app menu as in Photo Booth: About, Hide, Hide Others, Show All, Quit -
         // without Services, which a timer has nothing to offer to.
         .commands { CommandGroup(replacing: .systemServices) {} }
@@ -39,7 +40,31 @@ struct TimerApp: App {
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if Background.isHelper {
+            Background.quitOnSignal()
+        } else {
+            Background.takeOver()
+            // Opening the app opens its window, also when it was closed at the last quit.
+            DispatchQueue.main.async { self.showWindow() }
+        }
         Model.shared.launch()
+    }
+
+    /// The panel's Quit, which ends the timer too, not just the window.
+    static var quitNow = false
+
+    // Quit from the Dock or with ⌘Q: the helper carries on in the background (Background.swift).
+    // Not from the panel, nor at logout, restart or shutdown, which put 'why?' on the quit
+    // event; those end the timer, and so does Stop Running in Background.
+    func applicationWillTerminate(_ notification: Notification) {
+        let why = NSAppleEventManager.shared().currentAppleEvent?.attributeDescriptor(forKeyword: 0x7768_793F)
+        if Background.isHelper {
+            if !Background.handingBack { Model.shared.forgetRun() }
+        } else if !Self.quitNow, why == nil {
+            Background.handOver()
+        } else {
+            Model.shared.forgetRun()
+        }
     }
 
     // Closing the window keeps the timer running in the menu bar.
@@ -47,8 +72,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // A click on the Dock icon brings the window back.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if !flag { Model.shared.openMain?() }
+        if !flag { showWindow() }
         return true
+    }
+
+    private func showWindow() {
+        guard !NSApp.windows.contains(where: { $0.isVisible && $0.canBecomeMain }) else { return }
+        // The Window menu's own item for the window, as clicking it would: SwiftUI's openWindow
+        // does nothing when the app was launched without showing it.
+        if let menu = NSApp.windowsMenu,
+           let i = menu.items.firstIndex(where: { $0.title == Model.appName }) {
+            menu.performActionForItem(at: i)
+        } else {
+            Model.shared.openMain?()
+        }
     }
 }
 
@@ -119,11 +156,18 @@ struct MenuPanel: View {
             Divider()
             HStack {
                 Button(s.open) {
-                    openWindow(id: "main")
-                    NSApp.activate()
+                    if Background.isHelper {
+                        Background.openApp()
+                    } else {
+                        openWindow(id: "main")
+                        NSApp.activate()
+                    }
                 }
                 Spacer()
-                Button(s.quit) { NSApp.terminate(nil) }
+                Button(s.quit) {
+                    AppDelegate.quitNow = true
+                    NSApp.terminate(nil)
+                }
                     .keyboardShortcut("q")
             }
             .buttonStyle(.borderless)

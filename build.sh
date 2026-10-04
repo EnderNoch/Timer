@@ -94,6 +94,18 @@ else
 	echo "  brak Zegara macOS - zostaje sama nazwa \"$NAME\""
 fi
 
+# Pomocnik do "Dziala w tle" z Golden Gate (Sources/Background.swift): ten sam program
+# jako osobna aplikacja bez okna i bez ikony w Docku, ktora po Zakoncz trzyma pasek menu.
+echo "› pomocnik w tle"
+HELP="$NEW/Contents/Helpers/$NAME.app"
+mkdir -p "$HELP/Contents/MacOS"
+cp "$NEW/Contents/MacOS/$NAME" "$HELP/Contents/MacOS/$NAME"
+cp -R "$NEW/Contents/Resources" "$HELP/Contents/"
+cp "$NEW/Contents/Info.plist" "$HELP/Contents/Info.plist"
+plutil -replace CFBundleIdentifier -string "$ID.background" "$HELP/Contents/Info.plist"
+plutil -insert LSUIElement -bool true "$HELP/Contents/Info.plist"
+codesign --force --sign - "$HELP"
+
 echo "› podpisuje ad-hoc"
 codesign --force --sign - "$NEW"
 
@@ -104,7 +116,12 @@ ditto -c -k --keepParent "$NEW" "$NAME.zip"
 
 if pgrep -f "$APP/Contents/MacOS/$NAME" >/dev/null; then
 	echo "› zamykam dzialajaca aplikacje"
-	osascript -e "tell application id \"$ID\" to quit" 2>/dev/null || true
+	osascript -e "if application id \"$ID\" is running then tell application id \"$ID\" to quit" 2>/dev/null || true
+	sleep 1
+fi
+# Zakoncz zostawia pomocnika w tle; jego tez zamknac, zeby nie dzialala stara wersja.
+if pgrep -f "$APP/Contents/Helpers/" >/dev/null; then
+	osascript -e "if application id \"$ID.background\" is running then tell application id \"$ID.background\" to quit" 2>/dev/null || true
 	sleep 1
 fi
 
