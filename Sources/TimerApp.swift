@@ -23,15 +23,16 @@ struct TimerApp: App {
         MenuBarExtra {
             MenuPanel()
         } label: {
-            // The time while it runs, the timer symbol while idle. The label says the name and
-            // the state, like the system's own menu bar items ("Wi-Fi, connected"); without it
-            // the system reads the symbol's name.
+            // The time while it runs, the timer symbol while idle. The label says the name, the
+            // time and the state, like the system's own menu bar items ("Wi-Fi, connected"),
+            // idle too: the time that is set and "ready", never the bare name.
+            let label = "\(Model.appName), \(clock(m.left)), \(m.stateText)"
             if m.mode == .idle {
                 Image(systemName: "timer")
-                    .accessibilityLabel(Model.appName)
+                    .accessibilityLabel(label)
             } else {
                 Text(clock(m.left)).monospacedDigit()
-                    .accessibilityLabel("\(Model.appName), \(clock(m.left)), \(m.stateText)")
+                    .accessibilityLabel(label)
             }
         }
         .menuBarExtraStyle(.window)
