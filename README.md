@@ -27,7 +27,7 @@ The menu bar panel, opened from the timer icon:
 
 ## Install
 
-1. Download [Timer.zip](https://github.com/EnderNoch/Timer/raw/main/Timer.zip)
+1. Download [Timer.zip](https://github.com/EnderNoch/Timer/releases/latest/download/Timer.zip)
    and unzip it (double-click).
 2. Drag `Timer.app` into Applications. Finder and the Dock show it under its
    name in your system's language.
@@ -294,7 +294,7 @@ screenshots/             zrzuty ekranu do README
 
 ### Instalacja
 
-1. Pobierz [Timer.zip](https://github.com/EnderNoch/Timer/raw/main/Timer.zip)
+1. Pobierz [Timer.zip](https://github.com/EnderNoch/Timer/releases/latest/download/Timer.zip)
    i rozpakuj go (dwuklik).
 2. Przeciągnij `Timer.app` do folderu Aplikacje. W Finderze i Docku pokaże się
    jako „Minutnik” (albo „Timer” — w języku systemu).
